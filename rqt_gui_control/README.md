@@ -12,4 +12,8 @@ Run the rqt standalone command for rqt_gui_control plugin:
 	
 	rqt --standalone rqt_gui_control
 
+------
+Switch to gui_control
+
+
 
