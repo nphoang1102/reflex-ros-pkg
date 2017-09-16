@@ -1,10 +1,16 @@
+import rospy
 from python_qt_binding.QtWidgets import * #QWidget, QToolTip,QPushButton,QLabel,QGridLayout,QLineEdit
 from python_qt_binding.QtGui import * #QFont,QPalette, QColor
+
+from std_msgs.msg import String
+from reflex_msgs.msg import PoseCommand
 class MyWidgetWC(QWidget):
     
     def __init__(self):
         super(MyWidgetWC, self).__init__()
-        
+        self.command_pub = rospy.Publisher('/reflex_sf/command_position', PoseCommand, queue_size=1)
+        #rospy.init_node('listener', anonymous=True)
+
         self.initUI()
         
     def initUI(self):
@@ -88,7 +94,7 @@ class MyWidgetWC(QWidget):
         # Command row
         self.command_label = QLabel("Command")
         self.go_button = QPushButton("Go Go Go !!!")
-        self.home_button = QPushButton("Home run boys !!!")
+        self.home_button = QPushButton("Go Home boys !!!")
         self.re_button = QPushButton("Reset Goal")
 
         self.hbox_command = QHBoxLayout()
@@ -111,6 +117,10 @@ class MyWidgetWC(QWidget):
         self.finger_slider_3.valueChanged.connect(self.valuechange3)
         self.finger_slider_4.valueChanged.connect(self.valuechange4)
         
+        # Add connect signal to Button Go, Cancel and Reset
+        self.go_button.clicked.connect(self.handleButtonGo)
+        self.home_button.clicked.connect(self.handleButtonHome)
+        self.re_button.clicked.connect(self.handleButtonReset)
         #Set the widget to layout and show the widget
         self.setLayout(self.fbox)
    
@@ -126,9 +136,36 @@ class MyWidgetWC(QWidget):
     def valuechange2(self):
         float_value = float(self.finger_slider_2.value())/100.0
         self.value_slider_2.setText("%3.2f" % float_value)
+        
     def valuechange3(self):
         float_value = float(self.finger_slider_3.value())/100.0
         self.value_slider_3.setText("%3.2f" % float_value)
+
     def valuechange4(self):
         float_value = float(self.finger_slider_4.value())/100.0
         self.value_slider_4.setText("%3.2f" % float_value)
+
+    def handleButtonGo(self):
+        tar_f1 = float(self.finger_slider_1.value())/100.0
+        tar_f2 = float(self.finger_slider_2.value())/100.0
+        tar_f3 = float(self.finger_slider_3.value())/100.0
+        tar_f4 = float(self.finger_slider_4.value())/100.0
+        poseTarget = PoseCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,preshape=tar_f4)
+        self.command_pub.publish(poseTarget)
+        print "Go Button Click"
+
+    def handleButtonHome(self):
+        poseTarget = PoseCommand(f1=0.0,f2=0.0,f3=0.0,preshape=0.0)
+        self.command_pub.publish(poseTarget)
+        print "Home Button Click"
+
+    def handleButtonReset(self):
+        self.finger_slider_1.setValue(0)
+        self.value_slider_1.setText("0.00")
+        self.finger_slider_2.setValue(0)
+        self.value_slider_2.setText("0.00")
+        self.finger_slider_3.setValue(0)
+        self.value_slider_3.setText("0.00")
+        self.finger_slider_4.setValue(0)
+        self.value_slider_4.setText("0.00")
+        print "Reset Button Click"
