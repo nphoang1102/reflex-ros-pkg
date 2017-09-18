@@ -10,8 +10,10 @@
                     port_name: "/dev/ttyUSB0"
                     baud_rate: 57142
                     min_motor_id: 1
-                    max_motor_id: 4
-                    update_rate: 20
+                    max_motor_id: 4 <!-- These two serve as the input param for the dynamixel package to 
+                    identify connected motors -->
+                    update_rate: 20 <!-- Based on __update_motor_state function under dynamixel_serial_proxy,
+                    this will determine how fast the motor state is update in Hz (same value as rospy.rate) -->
         </rosparam>
     </node>
     <rosparam file="$(find reflex)/yaml/reflex_sf.yaml" command="load"/>
