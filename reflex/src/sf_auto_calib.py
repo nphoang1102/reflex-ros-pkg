@@ -28,15 +28,7 @@ class AutoCalibrate(object):
         rospy.init_node('SFautoCalibration')
 
         # Overload tracking dictionary
-        self.motors = {
-            0 : None, # Finger 1
-            1 : None, # Finger 2
-            2 : None, # Finger 3
-            3 : None # Preshape
-        }
-
-        # Start with not updated load value on motors
-        self.load_updated = False
+        self.motorsdata = None
 
         # Fetching user config params from .yaml file
         self.threshold = {
@@ -44,6 +36,14 @@ class AutoCalibrate(object):
             1: rospy.get_param("reflex_sf_f2/overload_threshold")
             2: rospy.get_param("reflex_sf_f3/overload_threshold")
             3: rospy.get_param("reflex_sf_f4/overload_threshold")
+        }
+
+        # Calibration motor angle
+        self.zero_angles = {
+            0: None
+            1: None
+            2: None
+            3: None
         }
 
         # Subscribe to the hand_state topic and update the load reading
@@ -55,22 +55,27 @@ class AutoCalibrate(object):
         self.vel_pub = rospy.Publisher('/reflex_sf/command_velocity', VelocityCommand, queue_size=1)
 
         # Wait for updated motor value then start autocalibration process
-        while(not self.load_updated):    
+        while(self.motosdata == None):    
         self._auto_calib()
 
     # Callback for updating the load on each motors
     def _loadupdate_cb(data):
-        self.motors[0] = data.motor[0].load
-        self.motors[1] = data.motor[1].load
-        self.motors[2] = data.motor[2].load
-        self.motors[3] = data.motor[3].load
-
-        # Inform that we have updated the new load value for each motors
-        if (not self.load_updated):
-            self.load_updated = True
+        self.motorsdata = data.motor
 
     # Autocalibration process here
     def _auto_calib():
+        # Prototype for one finger first
+        self.vel_pub.publish(VelocityCommand(f1 = 2.0, f2 = 0.0, f3 = 0.0, preshape = 0.0))
+
+        # Waiting for hand to reach overload position
+        while (self.motors[0].load < self.threshold[0]):
+
+        # Overload threshold reached, take measurement
+        self.zero_angles[0] = self.motors[0].raw_angle
+
+        # Stop the motor please
+        self.vel_pub.publish(VelocityCommand(f1 = 0.0, f2 = 0.0, f3 = 0.0, preshape = 0.0))
+
 
 # Run the calibration process in main
 if __name__ == '__main__':
