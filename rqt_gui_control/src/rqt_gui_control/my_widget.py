@@ -4,6 +4,7 @@ from python_qt_binding.QtGui import * #QFont,QPalette, QColor
 
 from std_msgs.msg import String
 from reflex_msgs.msg import PoseCommand
+from rqt_service.srv import SendTwoInt
 class MyWidgetWC(QWidget):
     
     def __init__(self):
@@ -102,6 +103,15 @@ class MyWidgetWC(QWidget):
         self.hbox_command.addWidget(self.home_button)
         self.hbox_command.addWidget(self.re_button)
 
+        # Calibrate row
+        self.cali_f1_label = QLabel("Calibrate f1")
+        self.cali_f1_tight_button = QPushButton("Tightening")
+        self.cali_f1_loosen_button = QPushButton("Loosensing")
+
+        self.hbox_cali_f1 = QHBoxLayout()
+        self.hbox_cali_f1.addWidget(self.cali_f1_tight_button)
+        self.hbox_cali_f1.addWidget(self.cali_f1_loosen_button)
+
         #QFormLayout similar to HBox but you know it look like form, add everything to FormLayout
         self.fbox = QFormLayout()
         self.fbox.addRow(self.finger_label_1,self.hbox_f1)
@@ -110,6 +120,7 @@ class MyWidgetWC(QWidget):
         self.fbox.addRow(self.finger_label_4,self.hbox_f4)
         self.fbox.addRow(self.coupling_label,self.hbox_tick)
         self.fbox.addRow(self.command_label,self.hbox_command)
+        self.fbox.addRow(self.cali_f1_label,self.hbox_cali_f1)
 
         # Connect singal when slider change to function respectively to change value of label
         self.finger_slider_1.valueChanged.connect(self.valuechange1)
@@ -121,6 +132,9 @@ class MyWidgetWC(QWidget):
         self.go_button.clicked.connect(self.handleButtonGo)
         self.home_button.clicked.connect(self.handleButtonHome)
         self.re_button.clicked.connect(self.handleButtonReset)
+        # Add connect signal to f1 tight and loosen button
+        self.cali_f1_tight_button.clicked.connect(self.handle_cali_f1_tight)
+        self.cali_f1_loosen_button.clicked.connect(self.handle_cali_f1_loosen)
         #Set the widget to layout and show the widget
         self.setLayout(self.fbox)
    
@@ -128,6 +142,28 @@ class MyWidgetWC(QWidget):
         self.resize(640,480)
 
         self.show()
+
+    def handle_cali_f1_tight(self):
+        rospy.wait_for_service('/send_two_int')
+        a = 1 # 1 is motor f1
+        b = 0 # 0 is tight, 1 is loosen
+        try:
+            send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
+            resp1 = send_two_int(a, b)
+            print resp1
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
+
+    def handle_cali_f1_loosen(self):
+        rospy.wait_for_service('/send_two_int')
+        a = 1 # 1 is motor f1
+        b = 1 # 0 is tight, 1 is loosen
+        try:
+            send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
+            resp1 = send_two_int(a, b)
+            print resp1
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
 
     def valuechange1(self):
         float_value = float(self.finger_slider_1.value())/100.0

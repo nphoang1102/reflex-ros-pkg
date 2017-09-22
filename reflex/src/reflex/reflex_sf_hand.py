@@ -30,6 +30,7 @@ from dynamixel_msgs.msg import JointState
 import rospkg
 import rospy
 from std_srvs.srv import Empty
+from rqt_service.srv import SendTwoInt
 
 from reflex_hand import ReflexHand
 from reflex_sf_motor import ReflexSFMotor
@@ -42,7 +43,7 @@ class ReflexSFHand(ReflexHand):
         self.hand_state_pub = rospy.Publisher(self.namespace + '/hand_state',
                                               reflex_msgs.msg.Hand, queue_size=10)
         rospy.Service(self.namespace + '/calibrate_fingers', Empty, self.calibrate)
-
+        rospy.Service('/send_two_int', SendTwoInt, self.gui_calibrate)
     def _receive_cmd_cb(self, data):
         self.disable_force_control()
         self.set_speeds(data.velocity)
@@ -80,7 +81,7 @@ class ReflexSFHand(ReflexHand):
 
     def calibrate(self, data=None):
         for motor in sorted(self.motors):
-            rospy.loginfo("Calibrating motor " + motor)
+            rospy.loginfo("Calibrating motor :" + motor)
             command = raw_input("Type 't' to tighten motor, 'l' to loosen \
 motor, or 'q' to indicate that the zero point has been reached\n")
             while not command.lower() == 'q':
@@ -98,6 +99,53 @@ motor, or 'q' to indicate that the zero point has been reached\n")
         print "Calibration complete, writing data to file"
         self._zero_current_pose()
         return []
+
+    # This function call when the service data get call to calibrate from gui_control
+    def gui_calibrate(self, data):
+        #base on motor varible in calibrate function, motor is reflex_sf + _f1
+        command = 1
+        if (data.a == 1):
+            if (data.b == 0):
+                print "Tightening motor f1"
+                self.motors[self.namespace + '_f1'].tighten(0.35 * command - 0.3)
+            else:
+                print "Loosening motor f1"
+                self.motors[self.namespace + '_f1'].loosen(0.35 * command - 0.3)
+
+            self.motors[self.namespace + '_f1']._set_local_motor_zero_point()
+
+        if (data.a == 2):
+            if (data.b == 0):
+                print "Tightening motor f2"
+                self.motors[self.namespace + '_f2'].tighten(0.35 * command - 0.3)
+            else:
+                print "Loosening motor f2"
+                self.motors[self.namespace + '_f2'].loosen(0.35 * command - 0.3)
+
+            self.motors[self.namespace + '_f2']._set_local_motor_zero_point()
+
+        if (data.a == 3):
+            if (data.b == 0):
+                print "Tightening motor f3"
+                self.motors[self.namespace + '_f3'].tighten(0.35 * command - 0.3)
+            else:
+                print "Loosening motor f3"
+                self.motors[self.namespace + '_f3'].loosen(0.35 * command - 0.3)
+
+            self.motors[self.namespace + '_f3']._set_local_motor_zero_point()
+        if (data.a == 4):
+            if (data.b == 0):
+                print "Tightening motor _preshape"
+                self.motors[self.namespace + '_preshape'].tighten(0.35 * command - 0.3)
+            else:
+                print "Loosening motor _preshape"
+                self.motors[self.namespace + '_preshape'].loosen(0.35 * command - 0.3)
+
+            self.motors[self.namespace + '_preshape']._set_local_motor_zero_point()
+
+        print "Calibration complete, writing data to file"
+        self._zero_current_pose()
+        return 1
 
     def _write_zero_point_data_to_file(self, filename, data):
         rospack = rospkg.RosPack()
