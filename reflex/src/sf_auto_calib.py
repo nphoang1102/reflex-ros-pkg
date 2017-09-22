@@ -1,21 +1,19 @@
+#!/usr/bin/env python
+
 # 
 # Script for autocalibration of the reflex SF hand
 # 
 
 __author__ = 'Hoang Nguyen'
-__maintainer__ = 'Hoang Nguyen'
+__maintainer__ = 'WPI MQP Yale Open Hand team'
 __email__ = 'nphoang1102@gmail.com'
 
 
-from math import pi, cos
-
 import rospy
-from std_srvs.srv import Empty
 
 from reflex_msgs.msg import Command
 from reflex_msgs.msg import PoseCommand
 from reflex_msgs.msg import VelocityCommand
-# from reflex_msgs.msg import ForceCommand
 from reflex_msgs.msg import Hand
 
 # Class for Reflex SF hand autocalibration
@@ -23,6 +21,9 @@ class AutoCalibrate(object):
 
     # Initialize class method
     def __init__(self):
+
+        # Print out something to the terminal
+        print("Initializing autocalibration node for Reflex SF")
 
         # First thing first, this needs a node name
         rospy.init_node('SFautoCalibration')
@@ -32,17 +33,17 @@ class AutoCalibrate(object):
 
         # Fetching user config params from .yaml file
         self.threshold = {
-            0: rospy.get_param("reflex_sf_f1/overload_threshold")
-            1: rospy.get_param("reflex_sf_f2/overload_threshold")
-            2: rospy.get_param("reflex_sf_f3/overload_threshold")
-            3: rospy.get_param("reflex_sf_f4/overload_threshold")
+            0: rospy.get_param("reflex_sf_f1/overload_threshold"),
+            1: rospy.get_param("reflex_sf_f2/overload_threshold"),
+            2: rospy.get_param("reflex_sf_f3/overload_threshold"),
+            3: rospy.get_param("reflex_sf_preshape/overload_threshold")
         }
 
         # Calibration motor angle
         self.zero_angles = {
-            0: None
-            1: None
-            2: None
+            0: None,
+            1: None,
+            2: None,
             3: None
         }
 
@@ -54,30 +55,40 @@ class AutoCalibrate(object):
         self.pos_pub = rospy.Publisher('/reflex_sf/command_position', PoseCommand, queue_size=1)
         self.vel_pub = rospy.Publisher('/reflex_sf/command_velocity', VelocityCommand, queue_size=1)
 
-        # Wait for updated motor value then start autocalibration process
-        while(self.motosdata == None):    
+        # Wait for updated motor value
+        while(self.motorsdata == None):
+            pass
+
+        # Motor value updated, start autocalibration process
+        print("Initializing complete, start auto calibration process")
         self._auto_calib()
 
     # Callback for updating the load on each motors
-    def _loadupdate_cb(data):
+    def _loadupdate_cb(self, data):
         self.motorsdata = data.motor
 
     # Autocalibration process here
-    def _auto_calib():
+    def _auto_calib(self):
         # Prototype for one finger first
         self.vel_pub.publish(VelocityCommand(f1 = 2.0, f2 = 0.0, f3 = 0.0, preshape = 0.0))
 
         # Waiting for hand to reach overload position
-        while (self.motors[0].load < self.threshold[0]):
+        while (self.motorsdata[0].load < self.threshold[0]):
+            pass
 
-        # Overload threshold reached, take measurement
-        self.zero_angles[0] = self.motors[0].raw_angle
-
-        # Stop the motor please
+        # Overload threshold reached, stop moving and take reading
         self.vel_pub.publish(VelocityCommand(f1 = 0.0, f2 = 0.0, f3 = 0.0, preshape = 0.0))
+        self.zero_angles[0] = self.motorsdata[0].raw_angle
+        print("Overload angle at", self.zero_angles[0])
 
+        # Open back the finger
+        self.vel_pub.publish(VelocityCommand(f1 = -2.0, f2 = 0.0, f3 = 0.0, preshape = 0.0))
 
-# Run the calibration process in main
-if __name__ == '__main__':
+# Our main process here
+def main():
     calibration_process = AutoCalibrate()
     rospy.spin()
+    
+# Run the calibration process in main
+if __name__ == '__main__':
+    main()
