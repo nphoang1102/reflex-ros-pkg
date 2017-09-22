@@ -47,6 +47,14 @@ class AutoCalibrate(object):
             3: None
         }
 
+        # Dictionary for storing velocity command
+        self.vel_command = {
+            0: VelocityCommand(f1 = 2.0, f2 = 0.0, f3 = 0.0, preshape = 0.0),
+            1: VelocityCommand(f1 = 0.0, f2 = 2.0, f3 = 0.0, preshape = 0.0),
+            2: VelocityCommand(f1 = 0.0, f2 = 0.0, f3 = 2.0, preshape = 0.0),
+            3: VelocityCommand(f1 = 0.0, f2 = 0.0, f3 = 0.0, preshape = 2.0)
+        }
+
         # Subscribe to the hand_state topic and update the load reading
         rospy.Subscriber('/reflex_sf/hand_state', Hand, self._loadupdate_cb)
 
@@ -69,25 +77,39 @@ class AutoCalibrate(object):
 
     # Autocalibration process here
     def _auto_calib(self):
-        # Prototype for one finger first
-        self.vel_pub.publish(VelocityCommand(f1 = 2.0, f2 = 0.0, f3 = 0.0, preshape = 0.0))
+        # Start closing the fingers to find overload angles
+        for finger in range(0,3):
+            self._find_loadpont(finger)
+            print("Finger", finger, "overload position recorded. Moving on")
+            rospy.sleep(0.5)
+
+        # Open back the fingers
+        self.vel_pub.publish(VelocityCommand(f1 = -2.0, f2 = -2.0, f3 = -2.0, preshape = 0.0))
+        print("Recorded overload position", self.zero_angles)
+
+    # Helper function to drive the finger to overload point and record
+    def _find_loadpont(self, finger):
+
+        # Close the finger
+        self.vel_pub.publish(self.vel_command[finger])
 
         # Waiting for hand to reach overload position
-        while (self.motorsdata[0].load < self.threshold[0]):
+        while (self.motorsdata[finger].load < self.threshold[finger]):
             pass
 
         # Overload threshold reached, stop moving and take reading
         self.vel_pub.publish(VelocityCommand(f1 = 0.0, f2 = 0.0, f3 = 0.0, preshape = 0.0))
-        self.zero_angles[0] = self.motorsdata[0].raw_angle
-        print("Overload angle at", self.zero_angles[0])
+        self.zero_angles[finger] = self.motorsdata[finger].raw_angle
 
-        # Open back the finger
-        self.vel_pub.publish(VelocityCommand(f1 = -2.0, f2 = 0.0, f3 = 0.0, preshape = 0.0))
+
 
 # Our main process here
 def main():
     calibration_process = AutoCalibrate()
     rospy.spin()
+
+
+
     
 # Run the calibration process in main
 if __name__ == '__main__':
