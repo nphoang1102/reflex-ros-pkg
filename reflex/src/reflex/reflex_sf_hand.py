@@ -22,6 +22,7 @@ __license__ = 'Apache License 2.0'
 __maintainer__ = 'RightHand Robotics'
 __email__ = 'reflex-support@righthandrobotics.com'
 
+from string import lstrip
 
 from os.path import join
 import yaml
@@ -42,6 +43,7 @@ class ReflexSFHand(ReflexHand):
         self.hand_state_pub = rospy.Publisher(self.namespace + '/hand_state',
                                               reflex_msgs.msg.Hand, queue_size=10)
         rospy.Service(self.namespace + '/calibrate_fingers', Empty, self.calibrate)
+        rospy.Service(self.namespace + '/auto_calibrate', Empty, self.auto_calibrate)
 
     def _receive_cmd_cb(self, data):
         self.disable_force_control()
@@ -98,6 +100,42 @@ motor, or 'q' to indicate that the zero point has been reached\n")
         print "Calibration complete, writing data to file"
         self._zero_current_pose()
         return []
+
+    # Motor autocalibration process
+    def auto_calibrate(self, data=None):
+        # Zeroed the current position first
+        self._zero_current_pose()
+
+        # Variable to store zero pos
+        zero_pos = dict()
+
+        # Goes through the fingers first, the preshape is still tricky
+        for motor in sorted(self.motors):
+            if (motor == "/reflex_sf_preshape"):
+                zero_pos["reflex_sf_preshape"] = dict(zero_point=self.motors[self.namespace + '_preshape'].get_current_raw_motor_angle())
+                print(zero_pos)
+                return None
+
+            # State we are currently auto calibrating motor
+            rospy.loginfo("Calibrating motor " + motor)
+
+            # Slowly increment the joint position until overload reached
+            while (self.motors[motor].get_load() < (self.motors[motor].get_load_threshold() * 0.5)):
+                self.motors[motor].set_motor_velocity(1.25)
+
+            # Open up again ?!
+            # TODO: Actually do something meaningful here...
+            self.motors[motor].set_motor_velocity(-1.25)
+            if (self.motors[motor].get_flip()):
+                offset = -4.6
+            else:
+                offset = 4.6
+            zero_pos[motor.lstrip("/")]=dict(zero_point=self.motors[motor].get_current_raw_motor_angle() - offset)
+            print("Overload angle:", self.motors[motor].get_current_raw_motor_angle())
+            rospy.loginfo("Overload threshold reached")
+
+        # End here
+
 
     def _write_zero_point_data_to_file(self, filename, data):
         rospack = rospkg.RosPack()
