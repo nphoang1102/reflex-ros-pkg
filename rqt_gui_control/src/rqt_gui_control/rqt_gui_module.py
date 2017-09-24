@@ -6,6 +6,7 @@ from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget
 from my_widget import MyWidgetWC
+from my_widget_vel_pos import MyWidgetVelPos
 from my_widget_vel import MyWidgetVel
 class MyPlugin(Plugin):
 
@@ -31,8 +32,12 @@ class MyPlugin(Plugin):
         self._widget.setObjectName('MyPosUI')
         self._widget2 = MyWidgetVel()
         self._widget2.setObjectName('MyVelUI')
+        self._widget3 = MyWidgetVelPos()
+        self._widget3.setObjectName('MyPosVelUI')
+        
         self._widget.setWindowTitle("Position Control")
         self._widget2.setWindowTitle("Velocity Control")
+        self._widget3.setWindowTitle("Position and Velocity Control")
         #self._widget.move(0,0)
         # Get path to UI file which should be in the "resource" folder of this package
         #ui_file = os.path.join(rospkg.RosPack().get_path('rqt_mypkg'), 'resource', 'MyPlugin.ui')
@@ -61,6 +66,7 @@ class MyPlugin(Plugin):
         
         context.add_widget(self._widget)
         context.add_widget(self._widget2)
+        context.add_widget(self._widget3)
         #context.add_widget(self._widget2)
 
     def shutdown_plugin(self):
