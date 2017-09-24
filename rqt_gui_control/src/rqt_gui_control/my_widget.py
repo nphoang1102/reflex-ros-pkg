@@ -139,8 +139,26 @@ class MyWidgetWC(QWidget):
         self.hbox_cali_f4.addWidget(self.cali_f4_tight_button)
         self.hbox_cali_f4.addWidget(self.cali_f4_loosen_button)
 ##########################################################################################################
+        self.listPose = []
+        pose0 = PoseCommand(f1=0.0,f2=0.0,f3=0.0,preshape=0.0)
+        self.listPose.append(pose0)
+        #Test List view
+        self.listWidget = QListWidget()
+        
+        item = QListWidgetItem("Pos('%2.2f','%2.2f','%2.2f','%2.2f')" % (pose0.f1,pose0.f2,pose0.f3,pose0.preshape))
+        self.listWidget.addItem(item)
 
+        self.listlabel = QLabel("List waypoint")
 
+        #List Control
+        self.list_control_label = QLabel("Waypoint Control")
+        self.list_control_save_button = QPushButton("Save")
+        self.list_control_delete_button = QPushButton("Remove")
+        self.list_control_go_button = QPushButton("Go waypoints")
+        self.list_control = QHBoxLayout()
+        self.list_control.addWidget(self.list_control_save_button)
+        self.list_control.addWidget(self.list_control_delete_button)
+        self.list_control.addWidget(self.list_control_go_button)
 ############ Adding rows and set up singal for button ####################################################
         #QFormLayout similar to HBox but you know it look like form, add everything to FormLayout
         self.fbox = QFormLayout()
@@ -154,6 +172,8 @@ class MyWidgetWC(QWidget):
         self.fbox.addRow(self.cali_f2_label,self.hbox_cali_f2)
         self.fbox.addRow(self.cali_f3_label,self.hbox_cali_f3)
         self.fbox.addRow(self.cali_f4_label,self.hbox_cali_f4)
+        self.fbox.addRow(self.listlabel,self.listWidget)
+        self.fbox.addRow(self.list_control_label,self.list_control)
 
         # Connect singal when slider change to function respectively to change value of label
         self.finger_slider_1.valueChanged.connect(self.valuechange1)
@@ -182,6 +202,9 @@ class MyWidgetWC(QWidget):
         self.cali_f4_tight_button.clicked.connect(self.handle_cali_f4_tight)
         self.cali_f4_loosen_button.clicked.connect(self.handle_cali_f4_loosen)
 
+        self.list_control_save_button.clicked.connect(self.handle_list_control_save_button)
+        self.list_control_delete_button.clicked.connect(self.handle_list_control_delete_button)
+        self.list_control_go_button.clicked.connect(self.handle_list_control_go_button)
 
 ######### Set up window ###################################################################################
         #Set the widget to layout and show the widget
@@ -286,26 +309,51 @@ class MyWidgetWC(QWidget):
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 #############################################################################################################
+    def handle_list_control_save_button(self):
+        float_value_1 = float(self.finger_slider_1.value())/100.0
+        float_value_2 = float(self.finger_slider_2.value())/100.0
+        float_value_3 = float(self.finger_slider_3.value())/100.0
+        float_value_4 = float(self.finger_slider_4.value())/100.0
+        pose0 = PoseCommand(f1=float_value_1,f2=float_value_2,f3=float_value_3,preshape=float_value_4)
+        self.listPose.append(pose0)
 
+        item = QListWidgetItem("Pos('%2.2f','%2.2f','%2.2f','%2.2f')" % (pose0.f1, pose0.f2, pose0.f3, pose0.preshape))
+        self.listWidget.addItem(item)
+
+    def handle_list_control_delete_button(self):
+        print "remove button click"
+        #print self.listWidget.currentRow()
+        dummy = self.listPose.pop(self.listWidget.currentRow())
+        #print dummy.f1
+        dummyItem = self.listWidget.takeItem(self.listWidget.currentRow())
+
+
+    def handle_list_control_go_button(self):
+        print "go waypoints click"
+
+        for pose in self.listPose:
+            print "Go to Pos('%2.2f','%2.2f','%2.2f','%2.2f')" % (pose.f1, pose.f2, pose.f3, pose.preshape)
+            self.command_pub.publish(pose)
+            rospy.sleep(2.)
 
 ######### valuechange for updating goal label ###############################################################
     def valuechange1(self):
         self.dumbnum = self.dumbnum + 1;
         float_value = float(self.finger_slider_1.value())/100.0
-        self.value_slider_1.setText("%3.2f" % float_value)
-        print "test time" + str(self.dumbnum)
+        self.value_slider_1.setText("%2.2f" % float_value)
+        #print "test time" + str(self.dumbnum)
 
     def valuechange2(self):
         float_value = float(self.finger_slider_2.value())/100.0
-        self.value_slider_2.setText("%3.2f" % float_value)
+        self.value_slider_2.setText("%2.2f" % float_value)
         
     def valuechange3(self):
         float_value = float(self.finger_slider_3.value())/100.0
-        self.value_slider_3.setText("%3.2f" % float_value)
+        self.value_slider_3.setText("%2.2f" % float_value)
 
     def valuechange4(self):
         float_value = float(self.finger_slider_4.value())/100.0
-        self.value_slider_4.setText("%3.2f" % float_value)
+        self.value_slider_4.setText("%2.2f" % float_value)
 
 #############################################################################################################
 

@@ -316,13 +316,13 @@ class MyWidgetVel(QWidget):
         tar_f2 = float(self.finger_slider_2.value())/10.0- 5.0
         tar_f3 = float(self.finger_slider_3.value())/10.0- 5.0
         tar_f4 = float(self.finger_slider_4.value())/10.0- 5.0
-        poseTarget = VelocityCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,preshape=tar_f4)
-        self.command_pub.publish(poseTarget)
+        velTarget = VelocityCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,preshape=tar_f4)
+        self.command_pub.publish(velTarget)
         print "Go Button Click"
 
     def handleButtonHome(self):
-        poseTarget = VelocityCommand(f1=0.0,f2=0.0,f3=0.0,preshape=0.0)
-        self.command_pub.publish(poseTarget)
+        velTarget = VelocityCommand(f1=-0.000000000000,f2=-0.000000000000,f3=-0.00000000000000,preshape=-0.0000000000000)
+        self.command_pub.publish(velTarget)
         print "Stop Button Click"
 
     def handleButtonReset(self):
