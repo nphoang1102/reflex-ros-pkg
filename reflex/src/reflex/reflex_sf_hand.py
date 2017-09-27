@@ -104,16 +104,34 @@ motor, or 'q' to indicate that the zero point has been reached\n")
     # Motor autocalibration process
     def auto_calibrate(self, data=None):
         # Zeroed the current position first
-        self._zero_current_pose()
+        # self._zero_current_pose()
 
         # Variable to store zero pos
+        preshape = "/reflex_sf_preshape"
         zero_pos = dict()
+
+        # First thing, manually calibrate the preshape joint
+        rospy.loginfo("Calibrating motor " + preshape)
+        command = raw_input("Type 't' to tighten motor, 'l' to loosen \
+motor, or 'q' to indicate that the zero point has been reached\n")
+        while not command.lower() == 'q':
+            if command.lower() == 't' or command.lower() == 'tt':
+                print "Tightening motor " + preshape
+                self.motors[preshape].tighten(0.35 * len(command) - 0.3)
+            elif command.lower() == 'l' or command.lower() == 'll':
+                print "Loosening motor " + preshape
+                self.motors[preshape].loosen(0.35 * len(command) - 0.3)
+            else:
+                print "Didn't recognize that command, use 't', 'l', or 'q'"
+            command = raw_input("Tighten: 't'\tLoosen: 'l'\tDone: 'q'\n")
+
 
         # Goes through the fingers first, the preshape is still tricky
         for motor in sorted(self.motors):
-            if (motor == "/reflex_sf_preshape"):
-                zero_pos["reflex_sf_preshape"] = dict(zero_point=self.motors[self.namespace + '_preshape'].get_current_raw_motor_angle())
+            if (motor == preshape):
+                zero_pos[preshape.lstrip("/")] = dict(zero_point=self.motors[self.namespace + '_preshape'].get_current_raw_motor_angle())
                 print(zero_pos)
+                self._write_zero_point_data_to_file('reflex_sf_zero_points.yaml', zero_pos)
                 return None
 
             # State we are currently auto calibrating motor
@@ -127,10 +145,10 @@ motor, or 'q' to indicate that the zero point has been reached\n")
             # TODO: Actually do something meaningful here...
             self.motors[motor].set_motor_velocity(-1.25)
             if (self.motors[motor].get_flip()):
-                offset = -4.6
+                offset = -4.7
             else:
-                offset = 4.6
-            zero_pos[motor.lstrip("/")]=dict(zero_point=self.motors[motor].get_current_raw_motor_angle() - offset)
+                offset = 4.7
+            zero_pos[motor.lstrip("/")] = dict(zero_point=self.motors[motor].get_current_raw_motor_angle() - offset)
             print("Overload angle:", self.motors[motor].get_current_raw_motor_angle())
             rospy.loginfo("Overload threshold reached")
 
