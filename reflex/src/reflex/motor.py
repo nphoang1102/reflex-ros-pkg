@@ -47,6 +47,9 @@ class Motor(object):
     def get_load(self):
         return self._motor_msg.load
 
+    def get_load_threshold(self):
+        return self._OVERLOAD_THRESHOLD
+
     def get_motor_msg(self):
         return self._motor_msg
 

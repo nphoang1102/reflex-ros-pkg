@@ -5,6 +5,7 @@ bin/
 build/
 devel/
 reflex_driver/yaml/*calibrate.yaml
+reflex/yaml/reflex_sf_zero_points.yaml
 *~
 *.pyc
 *.bag
