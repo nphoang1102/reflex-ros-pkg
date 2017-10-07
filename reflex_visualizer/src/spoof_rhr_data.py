@@ -28,7 +28,7 @@ def spoof_rhr_data():
 
         for i in range(3):
             hand.finger[i].proximal = finger_angle  # Proximal joints
-            hand.finger[i].distal_approx = 0.25 * finger_angle  # Distal joints
+            hand.finger[i].distal_approx = 0.25 * (finger_angle)  # Distal joints
             for j in range(9):
                 hand.finger[i].contact[j] = contact  # Finger tactile contact
                 hand.finger[i].pressure[j] = scalar  # Finger pressure scalar

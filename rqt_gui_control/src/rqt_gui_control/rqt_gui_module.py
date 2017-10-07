@@ -8,6 +8,7 @@ from python_qt_binding.QtWidgets import QWidget
 from my_widget import MyWidgetWC
 from my_widget_vel_pos import MyWidgetVelPos
 from my_widget_vel import MyWidgetVel
+from my_cali_widget import MyWidgetCali
 class MyPlugin(Plugin):
 
     def __init__(self, context):
@@ -34,10 +35,15 @@ class MyPlugin(Plugin):
         self._widget2.setObjectName('MyVelUI')
         self._widget3 = MyWidgetVelPos()
         self._widget3.setObjectName('MyPosVelUI')
-        
+        self._widget4 = MyWidgetCali()
+        self._widget4.setObjectName('MyCali')
+
         self._widget.setWindowTitle("Position Control")
         self._widget2.setWindowTitle("Velocity Control")
         self._widget3.setWindowTitle("Position and Velocity Control")
+        self._widget4.setWindowTitle('Calibration')
+        
+
         #self._widget.move(0,0)
         # Get path to UI file which should be in the "resource" folder of this package
         #ui_file = os.path.join(rospkg.RosPack().get_path('rqt_mypkg'), 'resource', 'MyPlugin.ui')
@@ -67,7 +73,7 @@ class MyPlugin(Plugin):
         context.add_widget(self._widget)
         context.add_widget(self._widget2)
         context.add_widget(self._widget3)
-        #context.add_widget(self._widget2)
+        context.add_widget(self._widget4)
 
     def shutdown_plugin(self):
         # TODO unregister all publishers here

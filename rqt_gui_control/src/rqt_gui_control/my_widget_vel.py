@@ -107,37 +107,37 @@ class MyWidgetVel(QWidget):
         self.hbox_command.addWidget(self.home_button)
         self.hbox_command.addWidget(self.re_button)
 ########### Calibrate section ############################################################################
-        # Calibrate f1 row
-        self.cali_f1_label = QLabel("Calibrate f1")
-        self.cali_f1_tight_button = QPushButton("Tightening f1")
-        self.cali_f1_loosen_button = QPushButton("Loosensing f1")
-        self.hbox_cali_f1 = QHBoxLayout()
-        self.hbox_cali_f1.addWidget(self.cali_f1_tight_button)
-        self.hbox_cali_f1.addWidget(self.cali_f1_loosen_button)
+        # # Calibrate f1 row
+        # self.cali_f1_label = QLabel("Calibrate f1")
+        # self.cali_f1_tight_button = QPushButton("Tightening f1")
+        # self.cali_f1_loosen_button = QPushButton("Loosensing f1")
+        # self.hbox_cali_f1 = QHBoxLayout()
+        # self.hbox_cali_f1.addWidget(self.cali_f1_tight_button)
+        # self.hbox_cali_f1.addWidget(self.cali_f1_loosen_button)
 
-        # Calibrate f2 row
-        self.cali_f2_label = QLabel("Calibrate f2")
-        self.cali_f2_tight_button = QPushButton("Tightening f2")
-        self.cali_f2_loosen_button = QPushButton("Loosensing f2")
-        self.hbox_cali_f2 = QHBoxLayout()
-        self.hbox_cali_f2.addWidget(self.cali_f2_tight_button)
-        self.hbox_cali_f2.addWidget(self.cali_f2_loosen_button)
+        # # Calibrate f2 row
+        # self.cali_f2_label = QLabel("Calibrate f2")
+        # self.cali_f2_tight_button = QPushButton("Tightening f2")
+        # self.cali_f2_loosen_button = QPushButton("Loosensing f2")
+        # self.hbox_cali_f2 = QHBoxLayout()
+        # self.hbox_cali_f2.addWidget(self.cali_f2_tight_button)
+        # self.hbox_cali_f2.addWidget(self.cali_f2_loosen_button)
 
-        # Calibrate f3 row
-        self.cali_f3_label = QLabel("Calibrate f3")
-        self.cali_f3_tight_button = QPushButton("Tightening f3")
-        self.cali_f3_loosen_button = QPushButton("Loosensing f3")
-        self.hbox_cali_f3 = QHBoxLayout()
-        self.hbox_cali_f3.addWidget(self.cali_f3_tight_button)
-        self.hbox_cali_f3.addWidget(self.cali_f3_loosen_button)
+        # # Calibrate f3 row
+        # self.cali_f3_label = QLabel("Calibrate f3")
+        # self.cali_f3_tight_button = QPushButton("Tightening f3")
+        # self.cali_f3_loosen_button = QPushButton("Loosensing f3")
+        # self.hbox_cali_f3 = QHBoxLayout()
+        # self.hbox_cali_f3.addWidget(self.cali_f3_tight_button)
+        # self.hbox_cali_f3.addWidget(self.cali_f3_loosen_button)
 
-        # Calibrate preshape row
-        self.cali_f4_label = QLabel("Calibrate preshape")
-        self.cali_f4_tight_button = QPushButton("Tightening preshape")
-        self.cali_f4_loosen_button = QPushButton("Loosensing preshape")
-        self.hbox_cali_f4 = QHBoxLayout()
-        self.hbox_cali_f4.addWidget(self.cali_f4_tight_button)
-        self.hbox_cali_f4.addWidget(self.cali_f4_loosen_button)
+        # # Calibrate preshape row
+        # self.cali_f4_label = QLabel("Calibrate preshape")
+        # self.cali_f4_tight_button = QPushButton("Tightening preshape")
+        # self.cali_f4_loosen_button = QPushButton("Loosensing preshape")
+        # self.hbox_cali_f4 = QHBoxLayout()
+        # self.hbox_cali_f4.addWidget(self.cali_f4_tight_button)
+        # self.hbox_cali_f4.addWidget(self.cali_f4_loosen_button)
 ##########################################################################################################
 
 
@@ -150,10 +150,10 @@ class MyWidgetVel(QWidget):
         self.fbox.addRow(self.finger_label_4,self.hbox_f4)
         #self.fbox.addRow(self.coupling_label,self.hbox_tick)
         self.fbox.addRow(self.command_label,self.hbox_command)
-        self.fbox.addRow(self.cali_f1_label,self.hbox_cali_f1)
-        self.fbox.addRow(self.cali_f2_label,self.hbox_cali_f2)
-        self.fbox.addRow(self.cali_f3_label,self.hbox_cali_f3)
-        self.fbox.addRow(self.cali_f4_label,self.hbox_cali_f4)
+        # self.fbox.addRow(self.cali_f1_label,self.hbox_cali_f1)
+        # self.fbox.addRow(self.cali_f2_label,self.hbox_cali_f2)
+        # self.fbox.addRow(self.cali_f3_label,self.hbox_cali_f3)
+        # self.fbox.addRow(self.cali_f4_label,self.hbox_cali_f4)
 
         # Connect singal when slider change to function respectively to change value of label
         self.finger_slider_1.valueChanged.connect(self.valuechange1)
@@ -166,21 +166,21 @@ class MyWidgetVel(QWidget):
         self.home_button.clicked.connect(self.handleButtonHome)
         self.re_button.clicked.connect(self.handleButtonReset)
 
-        # Add connect signal to f1 tight and loosen button
-        self.cali_f1_tight_button.clicked.connect(self.handle_cali_f1_tight)
-        self.cali_f1_loosen_button.clicked.connect(self.handle_cali_f1_loosen)
+        # # Add connect signal to f1 tight and loosen button
+        # self.cali_f1_tight_button.clicked.connect(self.handle_cali_f1_tight)
+        # self.cali_f1_loosen_button.clicked.connect(self.handle_cali_f1_loosen)
 
-        # Add connect signal to f1 tight and loosen button
-        self.cali_f2_tight_button.clicked.connect(self.handle_cali_f2_tight)
-        self.cali_f2_loosen_button.clicked.connect(self.handle_cali_f2_loosen)
+        # # Add connect signal to f1 tight and loosen button
+        # self.cali_f2_tight_button.clicked.connect(self.handle_cali_f2_tight)
+        # self.cali_f2_loosen_button.clicked.connect(self.handle_cali_f2_loosen)
 
-        # Add connect signal to f1 tight and loosen button
-        self.cali_f3_tight_button.clicked.connect(self.handle_cali_f3_tight)
-        self.cali_f3_loosen_button.clicked.connect(self.handle_cali_f3_loosen)
+        # # Add connect signal to f1 tight and loosen button
+        # self.cali_f3_tight_button.clicked.connect(self.handle_cali_f3_tight)
+        # self.cali_f3_loosen_button.clicked.connect(self.handle_cali_f3_loosen)
 
-        # Add connect signal to f1 tight and loosen button
-        self.cali_f4_tight_button.clicked.connect(self.handle_cali_f4_tight)
-        self.cali_f4_loosen_button.clicked.connect(self.handle_cali_f4_loosen)
+        # # Add connect signal to f1 tight and loosen button
+        # self.cali_f4_tight_button.clicked.connect(self.handle_cali_f4_tight)
+        # self.cali_f4_loosen_button.clicked.connect(self.handle_cali_f4_loosen)
 
 
 ######### Set up window ###################################################################################
@@ -196,95 +196,95 @@ class MyWidgetVel(QWidget):
 ######## These handler function does not let me have any other input !!!!!!!!!!!! so i cant change 
 ######## a, b when calling the function, so I have to make each handler for each button, need some refine
 ########## Tighten and Loosen for f1 ######################################################################    
-    def handle_cali_f1_tight(self):
-        rospy.wait_for_service('/send_two_int')
-        a = 1 # 1 is motor f1
-        b = 0 # 0 is tight, 1 is loosen
-        try:
-            send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
-            resp1 = send_two_int(a, b)
-            print resp1
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+#     def handle_cali_f1_tight(self):
+#         rospy.wait_for_service('/send_two_int')
+#         a = 1 # 1 is motor f1
+#         b = 0 # 0 is tight, 1 is loosen
+#         try:
+#             send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
+#             resp1 = send_two_int(a, b)
+#             print resp1
+#         except rospy.ServiceException, e:
+#             print "Service call failed: %s"%e
 
-    def handle_cali_f1_loosen(self):
-        rospy.wait_for_service('/send_two_int')
-        a = 1 # 1 is motor f1
-        b = 1 # 0 is tight, 1 is loosen
-        try:
-            send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
-            resp1 = send_two_int(a, b)
-            print resp1
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
-########## Tighten and Loosen for f2 ######################################################################
-    def handle_cali_f2_tight(self):
-        rospy.wait_for_service('/send_two_int')
-        a = 2 # 1 is motor f1
-        b = 0 # 0 is tight, 1 is loosen
-        try:
-            send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
-            resp1 = send_two_int(a, b)
-            print resp1
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+#     def handle_cali_f1_loosen(self):
+#         rospy.wait_for_service('/send_two_int')
+#         a = 1 # 1 is motor f1
+#         b = 1 # 0 is tight, 1 is loosen
+#         try:
+#             send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
+#             resp1 = send_two_int(a, b)
+#             print resp1
+#         except rospy.ServiceException, e:
+#             print "Service call failed: %s"%e
+# ########## Tighten and Loosen for f2 ######################################################################
+#     def handle_cali_f2_tight(self):
+#         rospy.wait_for_service('/send_two_int')
+#         a = 2 # 1 is motor f1
+#         b = 0 # 0 is tight, 1 is loosen
+#         try:
+#             send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
+#             resp1 = send_two_int(a, b)
+#             print resp1
+#         except rospy.ServiceException, e:
+#             print "Service call failed: %s"%e
 
-    def handle_cali_f2_loosen(self):
-        rospy.wait_for_service('/send_two_int')
-        a = 2 # 1 is motor f1
-        b = 1 # 0 is tight, 1 is loosen
-        try:
-            send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
-            resp1 = send_two_int(a, b)
-            print resp1
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+#     def handle_cali_f2_loosen(self):
+#         rospy.wait_for_service('/send_two_int')
+#         a = 2 # 1 is motor f1
+#         b = 1 # 0 is tight, 1 is loosen
+#         try:
+#             send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
+#             resp1 = send_two_int(a, b)
+#             print resp1
+#         except rospy.ServiceException, e:
+#             print "Service call failed: %s"%e
 
-########## Tighten and Loosen for f3 ######################################################################
-    def handle_cali_f3_tight(self):
-        rospy.wait_for_service('/send_two_int')
-        a = 3 # 1 is motor f1
-        b = 0 # 0 is tight, 1 is loosen
-        try:
-            send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
-            resp1 = send_two_int(a, b)
-            print resp1
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+# ########## Tighten and Loosen for f3 ######################################################################
+#     def handle_cali_f3_tight(self):
+#         rospy.wait_for_service('/send_two_int')
+#         a = 3 # 1 is motor f1
+#         b = 0 # 0 is tight, 1 is loosen
+#         try:
+#             send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
+#             resp1 = send_two_int(a, b)
+#             print resp1
+#         except rospy.ServiceException, e:
+#             print "Service call failed: %s"%e
 
-    def handle_cali_f3_loosen(self):
-        rospy.wait_for_service('/send_two_int')
-        a = 3 # 1 is motor f1
-        b = 1 # 0 is tight, 1 is loosen
-        try:
-            send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
-            resp1 = send_two_int(a, b)
-            print resp1
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+#     def handle_cali_f3_loosen(self):
+#         rospy.wait_for_service('/send_two_int')
+#         a = 3 # 1 is motor f1
+#         b = 1 # 0 is tight, 1 is loosen
+#         try:
+#             send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
+#             resp1 = send_two_int(a, b)
+#             print resp1
+#         except rospy.ServiceException, e:
+#             print "Service call failed: %s"%e
 
-########## Tighten and Loosen for f4 ######################################################################
-    def handle_cali_f4_tight(self):
-        rospy.wait_for_service('/send_two_int')
-        a = 4 # 1 is motor f1
-        b = 0 # 0 is tight, 1 is loosen
-        try:
-            send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
-            resp1 = send_two_int(a, b)
-            print resp1
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+# ########## Tighten and Loosen for f4 ######################################################################
+#     def handle_cali_f4_tight(self):
+#         rospy.wait_for_service('/send_two_int')
+#         a = 4 # 1 is motor f1
+#         b = 0 # 0 is tight, 1 is loosen
+#         try:
+#             send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
+#             resp1 = send_two_int(a, b)
+#             print resp1
+#         except rospy.ServiceException, e:
+#             print "Service call failed: %s"%e
 
-    def handle_cali_f4_loosen(self):
-        rospy.wait_for_service('/send_two_int')
-        a = 4 # 1 is motor f1
-        b = 1 # 0 is tight, 1 is loosen
-        try:
-            send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
-            resp1 = send_two_int(a, b)
-            print resp1
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+#     def handle_cali_f4_loosen(self):
+#         rospy.wait_for_service('/send_two_int')
+#         a = 4 # 1 is motor f1
+#         b = 1 # 0 is tight, 1 is loosen
+#         try:
+#             send_two_int = rospy.ServiceProxy('/send_two_int', SendTwoInt)
+#             resp1 = send_two_int(a, b)
+#             print resp1
+#         except rospy.ServiceException, e:
+#             print "Service call failed: %s"%e
 #############################################################################################################
 
 

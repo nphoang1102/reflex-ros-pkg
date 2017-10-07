@@ -23,6 +23,7 @@
 #define NUM_FIXED_STEPS     5
 #define NUM_FLEX_STEPS      9
 #define SENSORS_PER_FINGER  9
+#define OFFSET_ANGLE_DEGREE 0.2
 
 void publish_takktile_to_rviz(const reflex_msgs::HandConstPtr& hand);
 void publish_sf_to_rviz(const reflex_msgs::HandConstPtr& hand);
