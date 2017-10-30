@@ -161,9 +161,9 @@ motor, or 'q' to indicate that the zero point has been reached\n")
         zero_pos = dict()
 
         # First thing, manually calibrate the preshape joint
-        rospy.loginfo("Start manual calibrating %s.", preshape.lstrip("/"))
-        command = raw_input("Type 't' to tighten motor, 'l' to loosen \
-motor, or 'q' to indicate that the zero point has been reached\n")
+#         rospy.loginfo("Start manual calibrating %s.", preshape.lstrip("/"))
+#         command = raw_input("Type 't' to tighten motor, 'l' to loosen \
+# motor, or 'q' to indicate that the zero point has been reached\n")
         while not command.lower() == 'q':
             if command.lower() == 't' or command.lower() == 'tt':
                 print "Tightening motor " + preshape

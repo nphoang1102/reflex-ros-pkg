@@ -6,6 +6,7 @@ from std_msgs.msg import String
 from reflex_msgs.msg import PoseCommand
 from reflex_msgs.msg import VelocityCommand
 from reflex_msgs.msg import Command
+from reflex_msgs.msg import Hand
 
 from rqt_service.srv import SendTwoInt
 class MyWidgetVelPos(QWidget):
@@ -13,6 +14,7 @@ class MyWidgetVelPos(QWidget):
     def __init__(self):
         super(MyWidgetVelPos, self).__init__()
         self.command_pub = rospy.Publisher('/reflex_sf/command', Command, queue_size=1)
+        rospy.Subscriber('/reflex_sf/hand_state', Hand, self.hand_state_cb)
         #rospy.init_node('listener', anonymous=True)
 
         self.initUI()
@@ -27,7 +29,8 @@ class MyWidgetVelPos(QWidget):
         self.finger_slider_1.setMinimum(0)
         self.finger_slider_1.setMaximum(400)
         self.finger_slider_1.setValue(200)
-        self.value_slider_1 = QLabel("2.00")
+        self.value_slider_1 = QTextEdit("2.00")
+        self.value_slider_1.setMaximumSize(80,20)
         self.hbox_f1 = QHBoxLayout()
         self.hbox_f1.addWidget(self.finger_slider_1)
         self.hbox_f1.addWidget(self.value_slider_1)
@@ -40,7 +43,8 @@ class MyWidgetVelPos(QWidget):
         self.finger_slider_1_vel.setMinimum(0)
         self.finger_slider_1_vel.setMaximum(100)
         self.finger_slider_1_vel.setValue(50)
-        self.value_slider_1_vel = QLabel("0.0")
+        self.value_slider_1_vel = QTextEdit("0.0")
+        self.value_slider_1_vel.setMaximumSize(80,20)
         self.hbox_f1_vel = QHBoxLayout()
         self.hbox_f1_vel.addWidget(self.finger_slider_1_vel)
         self.hbox_f1_vel.addWidget(self.value_slider_1_vel)
@@ -54,7 +58,8 @@ class MyWidgetVelPos(QWidget):
         self.finger_slider_2.setMaximum(400)
         self.finger_slider_2.setValue(300)
 
-        self.value_slider_2 = QLabel("3.00")
+        self.value_slider_2 = QTextEdit("3.00")
+        self.value_slider_2.setMaximumSize(80,20)
         self.hbox_f2 = QHBoxLayout()
         self.hbox_f2.addWidget(self.finger_slider_2)
         self.hbox_f2.addWidget(self.value_slider_2)
@@ -68,7 +73,8 @@ class MyWidgetVelPos(QWidget):
         self.finger_slider_2_vel.setMinimum(0)
         self.finger_slider_2_vel.setMaximum(100)
         self.finger_slider_2_vel.setValue(50)
-        self.value_slider_2_vel = QLabel("0.0")
+        self.value_slider_2_vel = QTextEdit("0.0")
+        self.value_slider_2_vel.setMaximumSize(80,20)
         self.hbox_f2_vel = QHBoxLayout()
         self.hbox_f2_vel.addWidget(self.finger_slider_2_vel)
         self.hbox_f2_vel.addWidget(self.value_slider_2_vel)
@@ -82,7 +88,8 @@ class MyWidgetVelPos(QWidget):
         self.finger_slider_3.setMaximum(400)
         self.finger_slider_3.setValue(100)
 
-        self.value_slider_3 = QLabel("1.00")
+        self.value_slider_3 = QTextEdit("1.00")
+        self.value_slider_3.setMaximumSize(80,20)
         self.hbox_f3 = QHBoxLayout()
         self.hbox_f3.addWidget(self.finger_slider_3)
         self.hbox_f3.addWidget(self.value_slider_3)
@@ -94,7 +101,8 @@ class MyWidgetVelPos(QWidget):
         self.finger_slider_3_vel.setMinimum(0)
         self.finger_slider_3_vel.setMaximum(100)
         self.finger_slider_3_vel.setValue(50)
-        self.value_slider_3_vel = QLabel("0.0")
+        self.value_slider_3_vel = QTextEdit("0.0")
+        self.value_slider_3_vel.setMaximumSize(80,20)
         self.hbox_f3_vel = QHBoxLayout()
         self.hbox_f3_vel.addWidget(self.finger_slider_3_vel)
         self.hbox_f3_vel.addWidget(self.value_slider_3_vel)
@@ -107,7 +115,8 @@ class MyWidgetVelPos(QWidget):
         self.finger_slider_4.setMaximum(400)
         self.finger_slider_4.setValue(0)
 
-        self.value_slider_4 = QLabel("0.00")
+        self.value_slider_4 = QTextEdit("0.00")
+        self.value_slider_4.setMaximumSize(80,20)
         self.hbox_f4 = QHBoxLayout()
         self.hbox_f4.addWidget(self.finger_slider_4)
         self.hbox_f4.addWidget(self.value_slider_4)
@@ -119,7 +128,8 @@ class MyWidgetVelPos(QWidget):
         self.finger_slider_4_vel.setMinimum(0)
         self.finger_slider_4_vel.setMaximum(100)
         self.finger_slider_4_vel.setValue(50)
-        self.value_slider_4_vel = QLabel("0.0")
+        self.value_slider_4_vel = QTextEdit("0.0")
+        self.value_slider_4_vel.setMaximumSize(80,20)
         self.hbox_f4_vel = QHBoxLayout()
         self.hbox_f4_vel.addWidget(self.finger_slider_4_vel)
         self.hbox_f4_vel.addWidget(self.value_slider_4_vel)
@@ -193,6 +203,29 @@ class MyWidgetVelPos(QWidget):
         # self.hbox_cali_f4.addWidget(self.cali_f4_tight_button)
         # self.hbox_cali_f4.addWidget(self.cali_f4_loosen_button)
 ##########################################################################################################
+##########################################################################################################
+        self.listPose = []
+        pose0 = PoseCommand(f1=0.0,f2=0.0,f3=0.0,preshape=0.0)
+        vel0 = VelocityCommand(f1=0.0,f2=0.0,f3=0.0,preshape=0.0)
+        command0 = Command(pose0,vel0)
+        self.listPose.append(command0)
+        #Test List view
+        self.listWidget = QListWidget()
+        
+        item = QListWidgetItem("Pos(  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  )    Vel(  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  )" % (pose0.f1, pose0.f2, pose0.f3, pose0.preshape,vel0.f1,vel0.f2,vel0.f3,vel0.preshape))
+        self.listWidget.addItem(item)
+
+        self.listlabel = QLabel("List waypoint")
+
+        #List Control
+        self.list_control_label = QLabel("Waypoint Control")
+        self.list_control_save_button = QPushButton("Save")
+        self.list_control_delete_button = QPushButton("Remove")
+        self.list_control_go_button = QPushButton("Go waypoints")
+        self.list_control = QHBoxLayout()
+        self.list_control.addWidget(self.list_control_save_button)
+        self.list_control.addWidget(self.list_control_delete_button)
+        self.list_control.addWidget(self.list_control_go_button)
 
 
 ############ Adding rows and set up singal for button ####################################################
@@ -208,6 +241,8 @@ class MyWidgetVelPos(QWidget):
         self.fbox.addRow(self.finger_label_4_vel,self.hbox_f4_vel)
         self.fbox.addRow(self.coupling_label,self.hbox_tick)
         self.fbox.addRow(self.command_label,self.hbox_command)
+        self.fbox.addRow(self.listlabel,self.listWidget)
+        self.fbox.addRow(self.list_control_label,self.list_control)
         # self.fbox.addRow(self.cali_f1_label,self.hbox_cali_f1)
         # self.fbox.addRow(self.cali_f2_label,self.hbox_cali_f2)
         # self.fbox.addRow(self.cali_f3_label,self.hbox_cali_f3)
@@ -229,6 +264,9 @@ class MyWidgetVelPos(QWidget):
         self.home_button.clicked.connect(self.handleButtonHome)
         self.re_button.clicked.connect(self.handleButtonReset)
 
+        self.list_control_save_button.clicked.connect(self.handle_list_control_save_button)
+        self.list_control_delete_button.clicked.connect(self.handle_list_control_delete_button)
+        self.list_control_go_button.clicked.connect(self.handle_list_control_go_button)
         # # Add connect signal to f1 tight and loosen button
         # self.cali_f1_tight_button.clicked.connect(self.handle_cali_f1_tight)
         # self.cali_f1_loosen_button.clicked.connect(self.handle_cali_f1_loosen)
@@ -254,6 +292,7 @@ class MyWidgetVelPos(QWidget):
         self.resize(640,480)
         self.dumbnum = 0
         self.show()
+        self.current_angle = [0.0,0.0,0.0,0.0]
 
 ########## Tighten and Loosen Button Function for all four motor ##########################################
 ######## These handler function does not let me have any other input !!!!!!!!!!!! so i cant change 
@@ -349,14 +388,53 @@ class MyWidgetVelPos(QWidget):
 #         except rospy.ServiceException, e:
 #             print "Service call failed: %s"%e
 #############################################################################################################
+#############################################################################################################
+    def handle_list_control_save_button(self):
+        float_value_1 = float(self.value_slider_1.toPlainText())
+        float_value_2 = float(self.value_slider_2.toPlainText())
+        float_value_3 = float(self.value_slider_3.toPlainText())
+        float_value_4 = float(self.value_slider_4.toPlainText())
 
+        float_value_1_vel = float(self.value_slider_1_vel.toPlainText())
+        float_value_2_vel = float(self.value_slider_2_vel.toPlainText())
+        float_value_3_vel = float(self.value_slider_3_vel.toPlainText())
+        float_value_4_vel = float(self.value_slider_4_vel.toPlainText())
+
+        pose0 = PoseCommand(f1=float_value_1,f2=float_value_2,f3=float_value_3,preshape=float_value_4)
+        vel0 = VelocityCommand(f1 = float_value_1_vel, f2=float_value_2_vel,f3=float_value_3_vel,preshape = float_value_4_vel)
+        command0 = Command(pose0,vel0)
+        self.listPose.append(command0)
+
+        item = QListWidgetItem("Pos(  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  )    Vel(  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  )" % (pose0.f1, pose0.f2, pose0.f3, pose0.preshape,vel0.f1,vel0.f2,vel0.f3,vel0.preshape))
+        self.listWidget.addItem(item)
+
+    def handle_list_control_delete_button(self):
+        print "remove button click"
+        #print self.listWidget.currentRow()
+        dummy = self.listPose.pop(self.listWidget.currentRow())
+        #print dummy.f1
+        dummyItem = self.listWidget.takeItem(self.listWidget.currentRow())
+
+
+    def handle_list_control_go_button(self):
+        print "go waypoints click"
+
+        for pose in self.listPose:
+            print "Go to Pos('%2.2f','%2.2f','%2.2f','%2.2f')" % (pose.f1, pose.f2, pose.f3, pose.preshape)
+            self.command_pub.publish(pose)
+            print self.current_angle[0]
+            print pose.f1
+            rospy.sleep(0.1)
+            while not ((abs(self.current_angle[0] - pose.f1)<0.1) and (abs(self.current_angle[1] - pose.f2)<0.1) and (abs(self.current_angle[2] - pose.f3)<0.1) and (abs(self.current_angle[3] - pose.preshape)<0.1)):
+                print "test"
+            #rospy.sleep(2.)
 
 ######### valuechange for updating goal label ###############################################################
     def valuechange1(self):
-        self.dumbnum = self.dumbnum + 1;
+        #self.dumbnum = self.dumbnum + 1;
         float_value = float(self.finger_slider_1.value())/100.0
         self.value_slider_1.setText("%3.2f" % float_value)
-        print "test time" + str(self.dumbnum)
+        #print "test time" + str(self.dumbnum)
 
     def valuechange2(self):
         float_value = float(self.finger_slider_2.value())/100.0
@@ -430,3 +508,11 @@ class MyWidgetVelPos(QWidget):
         self.finger_slider_4_vel.setValue(50)
         self.value_slider_4_vel.setText("0.0")
         print "Reset Button Click"
+
+
+    ## Update Value of the hand for checking for waypoint
+    def hand_state_cb(self, hand):
+        self.current_angle[0] = hand.motor[0].joint_angle
+        self.current_angle[1] = hand.motor[1].joint_angle
+        self.current_angle[2] = hand.motor[2].joint_angle
+        self.current_angle[3] = hand.motor[3].joint_angle

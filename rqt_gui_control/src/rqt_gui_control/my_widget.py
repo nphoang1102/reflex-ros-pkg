@@ -28,7 +28,8 @@ class MyWidgetWC(QWidget):
         self.finger_slider_1.setMinimum(0)
         self.finger_slider_1.setMaximum(400)
         self.finger_slider_1.setValue(200)
-        self.value_slider_1 = QLabel("2.00")
+        self.value_slider_1 = QTextEdit("2.00")
+        self.value_slider_1.setMaximumSize(80,20)
         self.hbox_f1 = QHBoxLayout()
         self.hbox_f1.addWidget(self.finger_slider_1)
         self.hbox_f1.addWidget(self.value_slider_1)
@@ -41,7 +42,8 @@ class MyWidgetWC(QWidget):
         self.finger_slider_2.setMaximum(400)
         self.finger_slider_2.setValue(300)
 
-        self.value_slider_2 = QLabel("3.00")
+        self.value_slider_2 = QTextEdit("3.00")
+        self.value_slider_2.setMaximumSize(80,20)
         self.hbox_f2 = QHBoxLayout()
         self.hbox_f2.addWidget(self.finger_slider_2)
         self.hbox_f2.addWidget(self.value_slider_2)
@@ -56,7 +58,8 @@ class MyWidgetWC(QWidget):
         self.finger_slider_3.setMaximum(400)
         self.finger_slider_3.setValue(100)
 
-        self.value_slider_3 = QLabel("1.00")
+        self.value_slider_3 = QTextEdit("1.00")
+        self.value_slider_3.setMaximumSize(80,20)
         self.hbox_f3 = QHBoxLayout()
         self.hbox_f3.addWidget(self.finger_slider_3)
         self.hbox_f3.addWidget(self.value_slider_3)
@@ -69,7 +72,8 @@ class MyWidgetWC(QWidget):
         self.finger_slider_4.setMaximum(400)
         self.finger_slider_4.setValue(0)
 
-        self.value_slider_4 = QLabel("0.00")
+        self.value_slider_4 = QTextEdit("0.00")
+        self.value_slider_4.setMaximumSize(80,20)
         self.hbox_f4 = QHBoxLayout()
         self.hbox_f4.addWidget(self.finger_slider_4)
         self.hbox_f4.addWidget(self.value_slider_4)
@@ -149,7 +153,7 @@ class MyWidgetWC(QWidget):
         #Test List view
         self.listWidget = QListWidget()
         
-        item = QListWidgetItem("Pos('%2.2f','%2.2f','%2.2f','%2.2f')" % (pose0.f1,pose0.f2,pose0.f3,pose0.preshape))
+        item = QListWidgetItem("Pos(  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  )" % (pose0.f1,pose0.f2,pose0.f3,pose0.preshape))
         self.listWidget.addItem(item)
 
         self.listlabel = QLabel("List waypoint")
@@ -314,14 +318,14 @@ class MyWidgetWC(QWidget):
 #             print "Service call failed: %s"%e
 #############################################################################################################
     def handle_list_control_save_button(self):
-        float_value_1 = float(self.finger_slider_1.value())/100.0
-        float_value_2 = float(self.finger_slider_2.value())/100.0
-        float_value_3 = float(self.finger_slider_3.value())/100.0
-        float_value_4 = float(self.finger_slider_4.value())/100.0
+        float_value_1 = float(self.value_slider_1.toPlainText())
+        float_value_2 = float(self.value_slider_2.toPlainText())
+        float_value_3 = float(self.value_slider_3.toPlainText())
+        float_value_4 = float(self.value_slider_4.toPlainText())
         pose0 = PoseCommand(f1=float_value_1,f2=float_value_2,f3=float_value_3,preshape=float_value_4)
         self.listPose.append(pose0)
 
-        item = QListWidgetItem("Pos('%2.2f','%2.2f','%2.2f','%2.2f')" % (pose0.f1, pose0.f2, pose0.f3, pose0.preshape))
+        item = QListWidgetItem("Pos(  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  )" % (pose0.f1, pose0.f2, pose0.f3, pose0.preshape))
         self.listWidget.addItem(item)
 
     def handle_list_control_delete_button(self):
@@ -347,7 +351,7 @@ class MyWidgetWC(QWidget):
 
 ######### valuechange for updating goal label ###############################################################
     def valuechange1(self):
-        self.dumbnum = self.dumbnum + 1;
+        #self.dumbnum = self.dumbnum + 1;
         float_value = float(self.finger_slider_1.value())/100.0
         self.value_slider_1.setText("%2.2f" % float_value)
         #print "test time" + str(self.dumbnum)

@@ -4,6 +4,7 @@ from python_qt_binding.QtGui import * #QFont,QPalette, QColor
 
 from std_msgs.msg import String
 from reflex_msgs.msg import PoseCommand
+from std_srvs.srv import Empty
 from rqt_service.srv import SendTwoInt
 class MyWidgetCali(QWidget):
     
@@ -207,6 +208,8 @@ class MyWidgetCali(QWidget):
         self.cali_f4_tight_button.clicked.connect(self.handle_cali_f4_tight)
         self.cali_f4_loosen_button.clicked.connect(self.handle_cali_f4_loosen)
 
+        self.cali_f5_button.clicked.connect(self.handle_cali_f5)
+
         # self.list_control_save_button.clicked.connect(self.handle_list_control_save_button)
         # self.list_control_delete_button.clicked.connect(self.handle_list_control_delete_button)
         # self.list_control_go_button.clicked.connect(self.handle_list_control_go_button)
@@ -314,6 +317,13 @@ class MyWidgetCali(QWidget):
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 #############################################################################################################
+    def handle_cali_f5(self):
+        try:
+            auto_calibrate = rospy.ServiceProxy('/reflex_sf/auto_calibrate', Empty)
+            resp1 = auto_calibrate()
+            print resp1
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
 #     def handle_list_control_save_button(self):
 #         float_value_1 = float(self.finger_slider_1.value())/100.0
 #         float_value_2 = float(self.finger_slider_2.value())/100.0
