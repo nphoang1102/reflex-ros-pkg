@@ -282,7 +282,7 @@ class MyWidgetVelPos(QWidget):
         # # Add connect signal to f1 tight and loosen button
         # self.cali_f4_tight_button.clicked.connect(self.handle_cali_f4_tight)
         # self.cali_f4_loosen_button.clicked.connect(self.handle_cali_f4_loosen)
-
+        self.current_angle = [0.0,0.0,0.0,0.0]
 
 ######### Set up window ###################################################################################
         #Set the widget to layout and show the widget
@@ -292,7 +292,7 @@ class MyWidgetVelPos(QWidget):
         self.resize(640,480)
         self.dumbnum = 0
         self.show()
-        self.current_angle = [0.0,0.0,0.0,0.0]
+        
 
 ########## Tighten and Loosen Button Function for all four motor ##########################################
 ######## These handler function does not let me have any other input !!!!!!!!!!!! so i cant change 
@@ -468,15 +468,15 @@ class MyWidgetVelPos(QWidget):
 
 ######### Command Button handler ############################################################################
     def handleButtonGo(self):
-        tar_f1 = float(self.finger_slider_1.value())/100.0
-        tar_f2 = float(self.finger_slider_2.value())/100.0
-        tar_f3 = float(self.finger_slider_3.value())/100.0
-        tar_f4 = float(self.finger_slider_4.value())/100.0
+        tar_f1 = float(self.value_slider_1.toPlainText())
+        tar_f2 = float(self.value_slider_2.toPlainText())
+        tar_f3 = float(self.value_slider_3.toPlainText())
+        tar_f4 = float(self.value_slider_4.toPlainText())
 
-        vel_f1 = -float(self.finger_slider_1_vel.value())/10.0- 5.0
-        vel_f2 = -float(self.finger_slider_2_vel.value())/10.0- 5.0
-        vel_f3 = float(self.finger_slider_3_vel.value())/10.0- 5.0
-        vel_f4 = -float(self.finger_slider_4_vel.value())/10.0- 5.0
+        vel_f1 = float(self.value_slider_1_vel.toPlainText())
+        vel_f2 = float(self.value_slider_2_vel.toPlainText())
+        vel_f3 = float(self.value_slider_3_vel.toPlainText())
+        vel_f4 = float(self.value_slider_4_vel.toPlainText())
         poseTarget = PoseCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,preshape=tar_f4)
         velTarget = VelocityCommand(f1=vel_f1,f2=vel_f2,f3=vel_f3,preshape=vel_f4)
         target = Command(poseTarget,velTarget)

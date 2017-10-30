@@ -214,6 +214,8 @@ class MyWidgetWC(QWidget):
         self.list_control_delete_button.clicked.connect(self.handle_list_control_delete_button)
         self.list_control_go_button.clicked.connect(self.handle_list_control_go_button)
 
+        self.current_angle = [0.0,0.0,0.0,0.0]
+
 ######### Set up window ###################################################################################
         #Set the widget to layout and show the widget
         self.setLayout(self.fbox)
@@ -222,7 +224,7 @@ class MyWidgetWC(QWidget):
         self.resize(640,480)
         self.dumbnum = 0
         self.show()
-        self.current_angle = [0.0,0.0,0.0,0.0]
+        
 ########## Tighten and Loosen Button Function for all four motor ##########################################
 ######## These handler function does not let me have any other input !!!!!!!!!!!! so i cant change 
 ######## a, b when calling the function, so I have to make each handler for each button, need some refine
@@ -373,10 +375,10 @@ class MyWidgetWC(QWidget):
 
 ######### Command Button handler ############################################################################
     def handleButtonGo(self):
-        tar_f1 = float(self.finger_slider_1.value())/100.0
-        tar_f2 = float(self.finger_slider_2.value())/100.0
-        tar_f3 = float(self.finger_slider_3.value())/100.0
-        tar_f4 = float(self.finger_slider_4.value())/100.0
+        tar_f1 = float(self.value_slider_1.toPlainText())
+        tar_f2 = float(self.value_slider_2.toPlainText())
+        tar_f3 = float(self.value_slider_3.toPlainText())
+        tar_f4 = float(self.value_slider_4.toPlainText())
         poseTarget = PoseCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,preshape=tar_f4)
         self.command_pub.publish(poseTarget)
         print "Go Button Click"

@@ -46,6 +46,7 @@ class ReflexSFHand(ReflexHand):
         rospy.Service(self.namespace + '/calibrate_fingers', Empty, self.calibrate)
         rospy.Service('/send_two_int', SendTwoInt, self.gui_calibrate)
         rospy.Service(self.namespace + '/auto_calibrate', Empty, self.auto_calibrate)
+        rospy.Service(self.namespace + '/gui_auto_calibrate', Empty, self.gui_auto_calibrate)
 
     def _receive_cmd_cb(self, data):
         self.disable_force_control()
@@ -161,9 +162,9 @@ motor, or 'q' to indicate that the zero point has been reached\n")
         zero_pos = dict()
 
         # First thing, manually calibrate the preshape joint
-#         rospy.loginfo("Start manual calibrating %s.", preshape.lstrip("/"))
-#         command = raw_input("Type 't' to tighten motor, 'l' to loosen \
-# motor, or 'q' to indicate that the zero point has been reached\n")
+        rospy.loginfo("Start manual calibrating %s.", preshape.lstrip("/"))
+        command = raw_input("Type 't' to tighten motor, 'l' to loosen \
+motor, or 'q' to indicate that the zero point has been reached\n")
         while not command.lower() == 'q':
             if command.lower() == 't' or command.lower() == 'tt':
                 print "Tightening motor " + preshape
@@ -206,6 +207,60 @@ motor, or 'q' to indicate that the zero point has been reached\n")
         self._write_zero_point_data_to_file('reflex_sf_zero_points.yaml', zero_pos)
         return [] # rospy will raise an error if I return None here, interesting
 
+    # Motor autocalibration process
+    def gui_auto_calibrate(self, data=None):
+        # Zeroed the current position first
+        # self._zero_current_pose()
+
+        # Variable to store zero pos
+        preshape = "/reflex_sf_preshape"
+        zero_pos = dict()
+
+#         # First thing, manually calibrate the preshape joint
+#         rospy.loginfo("Start manual calibrating %s.", preshape.lstrip("/"))
+#         command = raw_input("Type 't' to tighten motor, 'l' to loosen \
+# motor, or 'q' to indicate that the zero point has been reached\n")
+#         while not command.lower() == 'q':
+#             if command.lower() == 't' or command.lower() == 'tt':
+#                 print "Tightening motor " + preshape
+#                 self.motors[preshape].tighten(0.35 * len(command) - 0.3)
+#             elif command.lower() == 'l' or command.lower() == 'll':
+#                 print "Loosening motor " + preshape
+#                 self.motors[preshape].loosen(0.35 * len(command) - 0.3)
+#             else:
+#                 print "Didn't recognize that command, use 't', 'l', or 'q'"
+#             command = raw_input("Tighten: 't'\tLoosen: 'l'\tDone: 'q'\n")
+#         rospy.loginfo("Manual calibration done, start auto calibrate the rest of the fingers.")
+
+        # Goes through the fingers first, the preshape is still tricky
+        for motor in sorted(self.motors):
+            if (motor == preshape):
+                zero_pos[preshape.lstrip("/")] = dict(zero_point=self.motors[self.namespace + '_preshape'].get_current_raw_motor_angle())
+                break
+
+            # State we are currently auto calibrating motor
+            rospy.loginfo("Start auto calibrating motor " + motor)
+
+            # Slowly increment the joint position until overload reached
+            while (self.motors[motor].get_load() < (self.motors[motor].get_load_threshold() * 0.5)):
+                self.motors[motor].set_motor_velocity(1.25)
+
+            # Open up again ?!
+            # TODO: Actually do something meaningful here...
+            self.motors[motor].set_motor_velocity(-1.25)
+            if (self.motors[motor].get_flip()):
+                offset = -4.7
+            else:
+                offset = 4.7
+            zero_pos[motor.lstrip("/")] = dict(zero_point=self.motors[motor].get_current_raw_motor_angle() - offset)
+            # print("Overload angle:", self.motors[motor].get_current_raw_motor_angle())
+            rospy.loginfo("%s done.", motor)
+
+        # End here, write calibration data to .yaml file and prompt user
+        print "Auto-calibration complete, writing data to file"
+        # print(zero_pos)
+        self._write_zero_point_data_to_file('reflex_sf_zero_points.yaml', zero_pos)
+        return [] # rospy will raise an error if I return None here, interesting
 
 
     def _write_zero_point_data_to_file(self, filename, data):

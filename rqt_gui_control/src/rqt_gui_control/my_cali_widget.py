@@ -319,7 +319,7 @@ class MyWidgetCali(QWidget):
 #############################################################################################################
     def handle_cali_f5(self):
         try:
-            auto_calibrate = rospy.ServiceProxy('/reflex_sf/auto_calibrate', Empty)
+            auto_calibrate = rospy.ServiceProxy('/reflex_sf/gui_auto_calibrate', Empty)
             resp1 = auto_calibrate()
             print resp1
         except rospy.ServiceException, e:
