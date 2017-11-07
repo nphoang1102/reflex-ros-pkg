@@ -23,6 +23,7 @@ __maintainer__ = 'RightHand Robotics'
 __email__ = 'reflex-support@righthandrobotics.com'
 
 from string import lstrip
+import sys
 
 from os.path import join
 import yaml
@@ -39,8 +40,9 @@ import reflex_msgs.msg
 
 
 class ReflexSFHand(ReflexHand):
-    def __init__(self):
-        super(ReflexSFHand, self).__init__('/reflex_sf', ReflexSFMotor)
+    def __init__(self,name='sf'):
+        self.prefix = 'reflex_'+ name
+        super(ReflexSFHand, self).__init__(self.prefix,ReflexSFMotor)
         self.hand_state_pub = rospy.Publisher(self.namespace + '/hand_state',
                                               reflex_msgs.msg.Hand, queue_size=10)
         rospy.Service(self.namespace + '/calibrate_fingers', Empty, self.calibrate)
@@ -281,9 +283,9 @@ motor, or 'q' to indicate that the zero point has been reached\n")
         self._write_zero_point_data_to_file('reflex_sf_zero_points.yaml', data)
 
 
-def main():
+def main(name):
     rospy.sleep(4.0)  # To allow services and parameters to load
-    hand = ReflexSFHand()
+    hand = ReflexSFHand(name)
     rospy.on_shutdown(hand.disable_torque)
     r = rospy.Rate(20)
     while not rospy.is_shutdown():
@@ -292,4 +294,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) <= 1:
+        print("USAGE: rosrun reflex_sf reflex_sf_hand.py Name //Name is name of hand (left or right, hand1 or hand2)")
+    main(sys.argv[1])
