@@ -23,7 +23,6 @@ __maintainer__ = 'RightHand Robotics'
 __email__ = 'reflex-support@righthandrobotics.com'
 
 from string import lstrip
-from math import pi
 
 from os.path import join
 import yaml
@@ -78,8 +77,8 @@ class ReflexSFHand(ReflexHand):
 
     def _publish_hand_state(self):
         state = reflex_msgs.msg.Hand()
-        motor_names = ('_f1', '_f2', '_f3', '_preshape')
-        for i in range(4):
+        motor_names = ('_f1', '_f2', '_f3', '_preshape1', '_preshape2')
+        for i in range(5):
             state.motor[i] = self.motors[self.namespace + motor_names[i]].get_motor_msg()
         self.hand_state_pub.publish(state)
 
@@ -190,14 +189,13 @@ motor, or 'q' to indicate that the zero point has been reached\n")
             while (self.motors[motor].get_load() < (self.motors[motor].get_load_threshold() * 0.5)):
                 self.motors[motor].set_motor_velocity(1.25)
 
-            # Open up again
+            # Open up again ?!
+            # TODO: Actually do something meaningful here...
             self.motors[motor].set_motor_velocity(-1.25)
             if (self.motors[motor].get_flip()):
-                offset = -math.pi * self.motors[motor].get_gear_ratio()
+                offset = -4.7
             else:
-                offset = math.pi * self.motors[motor].get_gear_ratio()
-            # Explanation on the math here: according to the documentation under reflex_msgs/Finger.msg, the
-            # moving space of the finger is from 0 to pi, thus explained the mathametical model here
+                offset = 4.7
             zero_pos[motor.lstrip("/")] = dict(zero_point=self.motors[motor].get_current_raw_motor_angle() - offset)
             # print("Overload angle:", self.motors[motor].get_current_raw_motor_angle())
             rospy.loginfo("%s done.", motor)

@@ -27,6 +27,7 @@
 
 #include <reflex_msgs/Hand.h>
 #include "./hand_visualizer.h"
+#include <ros/console.h>
 
 using namespace std;
 
@@ -41,7 +42,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "rhr_hand_visualizer");
   ros::NodeHandle n;
   joint_pub = n.advertise<sensor_msgs::JointState>("joint_states", 1);
-  sensor_pub = n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 1);
+  sensor_pub = n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array_test", 1);
 
   ROS_INFO("Number to resize: %d", NUM_FIXED_STEPS + 3 * (NUM_FLEX_STEPS + 1));
   joint_state.name.resize(NUM_FIXED_STEPS + 3 * (NUM_FLEX_STEPS + 1));
@@ -104,9 +105,10 @@ void publish_finger_to_rviz(const reflex_msgs::HandConstPtr& hand, bool takktile
     joint_state.position[1] = hand->finger[1].proximal;
     joint_state.position[2] = hand->finger[2].proximal;
   } else {
-    joint_state.position[0] = hand->motor[0].joint_angle;
-    joint_state.position[1] = hand->motor[1].joint_angle;
-    joint_state.position[2] = hand->motor[2].joint_angle;
+    //ROS_INFO("Get in here");
+    joint_state.position[0] = OFFSET_ANGLE_DEGREE + hand->motor[0].joint_angle;
+    joint_state.position[1] = OFFSET_ANGLE_DEGREE + hand->motor[1].joint_angle;
+    joint_state.position[2] = OFFSET_ANGLE_DEGREE + hand->motor[2].joint_angle;
   }
   joint_state.position[3] = hand->motor[3].joint_angle;
   joint_state.position[4] = -hand->motor[3].joint_angle;
@@ -116,7 +118,8 @@ void publish_finger_to_rviz(const reflex_msgs::HandConstPtr& hand, bool takktile
   {
     for (int i=0; i<(NUM_FLEX_STEPS+1); i++)
     {
-      joint_state.position[index] = hand->finger[finger].distal_approx/((float) (NUM_FLEX_STEPS+1));
+      //change hand->finger[finger].distal_approx to hand->motor[finger].joint_angle for testing
+      joint_state.position[index] = (float)hand->motor[finger].joint_angle/((float) 4*(NUM_FLEX_STEPS+1));
       index++;
     }
   }
