@@ -49,6 +49,9 @@ class ReflexSFMotor(Motor):
     def get_flip(self):
         return self.MOTOR_TO_JOINT_INVERTED
 
+    def get_gear_ratio(self):
+        return self.MOTOR_TO_JOINT_GEAR_RATIO
+
     def set_motor_angle(self, goal_pos):
         '''
         Bounds the given position command and sets it to the motor
