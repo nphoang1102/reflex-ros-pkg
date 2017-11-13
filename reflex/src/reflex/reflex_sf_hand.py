@@ -215,7 +215,8 @@ motor, or 'q' to indicate that the zero point has been reached\n")
         # self._zero_current_pose()
 
         # Variable to store zero pos
-        preshape = "/reflex_sf_preshape"
+        preshape = self.namespace + "_preshape"
+        print preshape
         zero_pos = dict()
 
 #         # First thing, manually calibrate the preshape joint

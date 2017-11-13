@@ -1,4 +1,4 @@
-reflex_sf_f1:
+reflex_left_hand_f1:
     controller:
         package: dynamixel_controllers
         module: joint_position_controller
@@ -16,7 +16,7 @@ reflex_sf_f1:
         min: 0
         max: 28672
 
-reflex_sf_f2:
+reflex_left_hand_f2:
     controller:
         package: dynamixel_controllers
         module: joint_position_controller
@@ -34,7 +34,7 @@ reflex_sf_f2:
         min: 0
         max: 28672
 
-reflex_sf_f3:
+reflex_left_hand_f3:
     controller:
         package: dynamixel_controllers
         module: joint_position_controller
@@ -52,7 +52,7 @@ reflex_sf_f3:
         min: 0
         max: 28672
 
-reflex_sf_preshape:
+reflex_left_hand_preshape:
     controller:
         package: dynamixel_controllers
         module: joint_position_controller

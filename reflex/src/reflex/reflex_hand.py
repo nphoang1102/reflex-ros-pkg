@@ -36,6 +36,7 @@ class ReflexHand(object):
         '''
         self.namespace = name
         rospy.init_node(self.namespace+'_hand')
+        self.namespace = '/'+self.namespace
         rospy.loginfo('Starting up the hand')
         self.motors = {self.namespace + '_f1': MotorClass(self.namespace + '_f1'),
                        self.namespace + '_f2': MotorClass(self.namespace + '_f2'),

@@ -11,7 +11,7 @@ class MyWidgetWC(QWidget):
     
     def __init__(self):
         super(MyWidgetWC, self).__init__()
-        self.command_pub = rospy.Publisher('/reflex_sf/command_position', PoseCommand, queue_size=1)
+        self.command_pub = rospy.Publisher('/reflex_left_hand/command_position', PoseCommand, queue_size=1)
         # Constantly capture the current hand state
         rospy.Subscriber('/reflex_sf/hand_state', Hand, self.hand_state_cb)
         #rospy.init_node('listener', anonymous=True)
