@@ -33,12 +33,12 @@ import rospy
 from std_srvs.srv import Empty
 from rqt_service.srv import SendTwoInt
 
-from reflex_hand import ReflexHand
+from reflex_hand_v2 import ReflexHandV2
 from reflex_sf_motor import ReflexSFMotor
 import reflex_msgs.msg
 
 
-class ReflexSFHand(ReflexHand):
+class ReflexSFHandV2(ReflexHandV2):
     def __init__(self):
         super(ReflexSFHandV2, self).__init__('/reflex_sf', ReflexSFMotor)
         self.hand_state_pub = rospy.Publisher(self.namespace + '/hand_state',
@@ -77,16 +77,16 @@ class ReflexSFHand(ReflexHand):
             motor.enable_torque()
 
     def _publish_hand_state(self):
-        state = reflex_msgs.msg.Hand()
-        motor_names = ('_f1', '_f2', '_f3', '_preshape1', '_preshape2')
-        for i in range(5):
-            state.motor[i] = self.motors[self.namespace + motor_names[i]].get_motor_msg()
-        self.hand_state_pub.publish(state)
-        
         # state = reflex_msgs.msg.Hand()
-        # for i in range(len(self.motornames)):
-        #     state.motor[i] = self.motors[self.namespace + self.motornames[i]].get_motor_msg()
+        # motor_names = ('_f1', '_f2', '_f3', '_preshape1', '_preshape2')
+        # for i in range(5):
+        #     state.motor[i] = self.motors[self.namespace + motor_names[i]].get_motor_msg()
         # self.hand_state_pub.publish(state)
+        
+        state = reflex_msgs.msg.Hand()
+        for i in range(len(self.motornames)):
+            state.motor[i] = self.motors[self.namespace + self.motornames[i]].get_motor_msg()
+        self.hand_state_pub.publish(state)
 
     def calibrate(self, data=None):
         for motor in sorted(self.motors):
@@ -209,7 +209,9 @@ motor, or 'q' to indicate that the zero point has been reached\n")
         # End here, write calibration data to .yaml file and prompt user
         print "Auto-calibration complete, writing data to file"
         # print(zero_pos)
-        self._write_zero_point_data_to_file('reflex_sf_zero_points.yaml', zero_pos)
+        yaml_path = rospy.get_param('yaml_zero_path')
+        self._write_zero_point_data_to_file(yaml_path, data)
+        # self._write_zero_point_data_to_file('reflex_sf_zero_points.yaml', zero_pos)
         return [] # rospy will raise an error if I return None here, interesting
 
 
@@ -223,32 +225,39 @@ motor, or 'q' to indicate that the zero point has been reached\n")
             outfile.write(yaml.dump(data))
 
     def _zero_current_pose(self):
-        data = dict(
-            reflex_sf_f1=dict(zero_point=self.motors[self.namespace + '_f1'].get_current_raw_motor_angle()),
-            reflex_sf_f2=dict(zero_point=self.motors[self.namespace + '_f2'].get_current_raw_motor_angle()),
-            reflex_sf_f3=dict(zero_point=self.motors[self.namespace + '_f3'].get_current_raw_motor_angle()),
-            reflex_sf_preshape=dict(zero_point=self.motors[self.namespace + '_preshape'].get_current_raw_motor_angle())
-        )
-        self._write_zero_point_data_to_file('reflex_sf_zero_points.yaml', data)
+        # data = dict(
+        #     reflex_sf_f1=dict(zero_point=self.motors[self.namespace + '_f1'].get_current_raw_motor_angle()),
+        #     reflex_sf_f2=dict(zero_poxint=self.motors[self.namespace + '_f2'].get_current_raw_motor_angle()),
+        #     reflex_sf_f3=dict(zero_point=self.motors[self.namespace + '_f3'].get_current_raw_motor_angle()),
+        #     reflex_sf_preshape=dict(zero_point=self.motors[self.namespace + '_preshape'].get_current_raw_motor_angle())
+        # )
+        data = dict()
+        for motorname in self.motornames:
+            name = self.namespace + motorname
+            data.update({name:dict(zero_point=self.motors[name].get_current_raw_motor_angle())})
+        yaml_path = rospy.get_param('yaml_zero_path')
+        self._write_zero_point_data_to_file(yaml_path, data)
 
 
 def main():
     rospy.sleep(4.0)  # To allow services and parameters to load
-    hand = ReflexSFHandV2()
-    rospy.on_shutdown(hand.disable_torque)
-    #test()
-    r = rospy.Rate(20)
+    # hand = ReflexSFHandV2()
+    # rospy.on_shutdown(hand.disable_torque)
+    test()
+    # r = rospy.Rate(20)
     while not rospy.is_shutdown():
-        hand._publish_hand_state()
-        r.sleep()
+        # hand._publish_hand_state()
+        # r.sleep()
         pass
 
-# def test():
-#     #hand = ReflexSFHandV2()
-#     testmsg = reflex_msgs.msg.PoseCommand(4.0,3.0,2.0,1.0)
-#     print(testmsg)
-#     x = getattr(testmsg,"f1")
-#     print(x)
+def test():
+    #hand = ReflexSFHandV2()
+    testmsg = reflex_msgs.msg.PoseCommand(4.0,3.0,2.0,1.0)
+    print(testmsg)
+    x = getattr(testmsg,"f1")
+    print(x)
+    yaml_path = rospy.get_param('yaml_zero_path')
+    print(yaml_path)
 
 if __name__ == '__main__':
     main()
