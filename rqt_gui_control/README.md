@@ -4,6 +4,8 @@ Custom GUI using rqt to control Reflex Hand
 
 How to run
 ------
+Run roscore before, also have __init__.py under the src folder.
+
 Go to rqt_gui_control:
 
 	roscd rqt_gui_control
