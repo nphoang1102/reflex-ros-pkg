@@ -42,6 +42,9 @@ class ReflexSFMotor(Motor):
         self.torque_enable_service(True)
         self.state_subscriber = rospy.Subscriber(name + '/state', JointState, self._receive_state_cb)
         self.reset_motor_speed()
+    
+    def get_name(self):
+        return self.name
 
     def get_current_raw_motor_angle(self):
         return self._motor_msg.raw_angle

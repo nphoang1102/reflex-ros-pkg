@@ -23,7 +23,7 @@ __maintainer__ = 'RightHand Robotics'
 __email__ = 'reflex-support@righthandrobotics.com'
 
 from string import lstrip
-from math import pi
+from math import pi as PI
 
 from os.path import join
 import yaml
@@ -153,7 +153,7 @@ motor, or 'q' to indicate that the zero point has been reached\n")
         return 1
 
     # Motor autocalibration process
-    def auto_calibrate(self, data=None):
+    def auto_calibrate(self, data=None, manual_start=False):
         # Zeroed the current position first
         # self._zero_current_pose()
 
@@ -161,21 +161,22 @@ motor, or 'q' to indicate that the zero point has been reached\n")
         preshape = "/reflex_sf_preshape"
         zero_pos = dict()
 
-        # First thing, manually calibrate the preshape joint
-#         rospy.loginfo("Start manual calibrating %s.", preshape.lstrip("/"))
-#         command = raw_input("Type 't' to tighten motor, 'l' to loosen \
-# motor, or 'q' to indicate that the zero point has been reached\n")
-        while not command.lower() == 'q':
-            if command.lower() == 't' or command.lower() == 'tt':
-                print "Tightening motor " + preshape
-                self.motors[preshape].tighten(0.35 * len(command) - 0.3)
-            elif command.lower() == 'l' or command.lower() == 'll':
-                print "Loosening motor " + preshape
-                self.motors[preshape].loosen(0.35 * len(command) - 0.3)
-            else:
-                print "Didn't recognize that command, use 't', 'l', or 'q'"
-            command = raw_input("Tighten: 't'\tLoosen: 'l'\tDone: 'q'\n")
-        rospy.loginfo("Manual calibration done, start auto calibrate the rest of the fingers.")
+        # First thing, manually calibrate the preshape joint, only when needed
+        if (manual_start):
+            rospy.loginfo("Start manual calibrating %s.", preshape.lstrip("/"))
+            command = raw_input("Type 't' to tighten motor, 'l' to loosen \
+            motor, or 'q' to indicate that the zero point has been reached\n")
+            while not command.lower() == 'q':
+                if command.lower() == 't' or command.lower() == 'tt':
+                    print "Tightening motor " + preshape
+                    self.motors[preshape].tighten(0.35 * len(command) - 0.3)
+                elif command.lower() == 'l' or command.lower() == 'll':
+                    print "Loosening motor " + preshape
+                    self.motors[preshape].loosen(0.35 * len(command) - 0.3)
+                else:
+                    print "Didn't recognize that command, use 't', 'l', or 'q'"
+                command = raw_input("Tighten: 't'\tLoosen: 'l'\tDone: 'q'\n")
+            rospy.loginfo("Manual calibration done, start auto calibrate the rest of the fingers.")
 
         # Goes through the fingers first, the preshape is still tricky
         for motor in sorted(self.motors):
@@ -193,12 +194,16 @@ motor, or 'q' to indicate that the zero point has been reached\n")
             # Open up again
             self.motors[motor].set_motor_velocity(-1.25)
             if (self.motors[motor].get_flip()):
-                offset = -math.pi * self.motors[motor].get_gear_ratio()
+                offset = -PI * self.motors[motor].get_gear_ratio()
             else:
-                offset = math.pi * self.motors[motor].get_gear_ratio()
+                offset = PI * self.motors[motor].get_gear_ratio()
             # Explanation on the math here: according to the documentation under reflex_msgs/Finger.msg, the
             # moving space of the finger is from 0 to pi, thus explained the mathametical model here
             zero_pos[motor.lstrip("/")] = dict(zero_point=self.motors[motor].get_current_raw_motor_angle() - offset)
+
+            # Bug fix: Write the zero position to the ros param, or else it would not take effect
+            rospy.set_param(self.motors[motor].get_name() + '/zero_point', zero_pos[motor.lstrip("/")])
+
             # print("Overload angle:", self.motors[motor].get_current_raw_motor_angle())
             rospy.loginfo("%s done.", motor)
 
