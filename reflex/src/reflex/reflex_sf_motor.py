@@ -42,9 +42,6 @@ class ReflexSFMotor(Motor):
         self.torque_enable_service(True)
         self.state_subscriber = rospy.Subscriber(name + '/state', JointState, self._receive_state_cb)
         self.reset_motor_speed()
-    
-    def get_name(self):
-        return self.name
 
     def get_current_raw_motor_angle(self):
         return self._motor_msg.raw_angle
@@ -136,8 +133,11 @@ class ReflexSFMotor(Motor):
             self._control_force(self._motor_msg.load, k=3.0*0.025)
         self._loosen_if_overloaded(self._motor_msg.load)
 
-    def _set_local_motor_zero_point(self):
-        self.zero_point = self._motor_msg.raw_angle
+    def _set_local_motor_zero_point(self, zeroed_angle=False):
+        if (zeroed_angle):
+            self.zero_point = zeroed_angle
+        else:
+            self.zero_point = self._motor_msg.raw_angle
         rospy.set_param(self.name + '/zero_point', self._motor_msg.raw_angle)
 
     def _set_raw_motor_angle(self, goal_pos):

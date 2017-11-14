@@ -153,9 +153,7 @@ motor, or 'q' to indicate that the zero point has been reached\n")
         return 1
 
     # Motor autocalibration process
-    def auto_calibrate(self, data=None, manual_start=False):
-        # Zeroed the current position first
-        # self._zero_current_pose()
+    def auto_calibrate(self, data=None, speed=1.00, manual_start=False):
 
         # Variable to store zero pos
         preshape = "/reflex_sf_preshape"
@@ -184,33 +182,39 @@ motor, or 'q' to indicate that the zero point has been reached\n")
                 zero_pos[preshape.lstrip("/")] = dict(zero_point=self.motors[self.namespace + '_preshape'].get_current_raw_motor_angle())
                 break
 
-            # State we are currently auto calibrating motor
+            # Zeroed the current position first
+            self.motors[motor]._set_local_motor_zero_point()
+            
+            # Prompt user that we are currently auto calibrating motor
             rospy.loginfo("Start auto calibrating motor " + motor)
 
             # Slowly increment the joint position until overload reached
             while (self.motors[motor].get_load() < (self.motors[motor].get_load_threshold() * 0.5)):
-                self.motors[motor].set_motor_velocity(1.25)
+                self.motors[motor].set_motor_velocity(speed)
 
-            # Open up again
-            self.motors[motor].set_motor_velocity(-1.25)
+            # Overload position reached, start computation
             if (self.motors[motor].get_flip()):
                 offset = -PI * self.motors[motor].get_gear_ratio()
             else:
                 offset = PI * self.motors[motor].get_gear_ratio()
             # Explanation on the math here: according to the documentation under reflex_msgs/Finger.msg, the
             # moving space of the finger is from 0 to pi, thus explained the mathametical model here
-            zero_pos[motor.lstrip("/")] = dict(zero_point=self.motors[motor].get_current_raw_motor_angle() - offset)
+
+            # Computating the zeroed angle to send out
+            zeroed_angle = self.motors[motor].get_current_raw_motor_angle() - offset
+            zero_pos[motor.lstrip("/")] = dict(zero_point=zeroed_angle)
 
             # Bug fix: Write the zero position to the ros param, or else it would not take effect
-            rospy.set_param(self.motors[motor].get_name() + '/zero_point', zero_pos[motor.lstrip("/")])
+            self.motors[motor]._set_local_motor_zero_point(zeroed_angle)
 
-            # print("Overload angle:", self.motors[motor].get_current_raw_motor_angle())
+            # Got zero position, open up the hand to desired position and print out
+            # cannot send negative speed as the zeroed angle will not be updated till then
+            self.motors[motor].set_motor_angle(0.0)
             rospy.loginfo("%s done.", motor)
 
-        # End here, write calibration data to .yaml file and prompt user
-        print "Auto-calibration complete, writing data to file"
-        # print(zero_pos)
+        # Write to .yaml file and prompt user
         self._write_zero_point_data_to_file('reflex_sf_zero_points.yaml', zero_pos)
+        print "Auto-calibration complete, writing data to file"
         return [] # rospy will raise an error if I return None here, interesting
 
 
