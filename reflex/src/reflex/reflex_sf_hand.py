@@ -153,7 +153,7 @@ motor, or 'q' to indicate that the zero point has been reached\n")
         return 1
 
     # Motor autocalibration process
-    def auto_calibrate(self, data=None, speed=1.00, manual_start=False):
+    def auto_calibrate(self, data=None, speed=1.00, manual_start=True):
 
         # Variable to store zero pos
         preshape = "/reflex_sf_preshape"
