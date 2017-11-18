@@ -8,7 +8,7 @@
             serial_ports:
                 reflex_sf_port:
                     port_name: "/dev/ttyUSB0"
-                    baud_rate: 57142
+                    baud_rate: 1000000
                     min_motor_id: 1
                     max_motor_id: 4 <!-- These two serve as the input param for the dynamixel package to 
                     identify connected motors -->
