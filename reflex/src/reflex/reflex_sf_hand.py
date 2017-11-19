@@ -238,7 +238,10 @@ motor, or 'q' to indicate that the zero point has been reached\n")
 
 
 def main():
-    rospy.sleep(4.0)  # To allow services and parameters to load
+    # Wait for the controller process to done completely
+    while not self.get_controller_startup_status():
+        pass
+    # rospy.sleep(4.0)  # To allow services and parameters to load
     hand = ReflexSFHand()
     rospy.on_shutdown(hand.disable_torque)
     r = rospy.Rate(20)

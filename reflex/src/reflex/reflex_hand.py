@@ -23,6 +23,7 @@ __email__ = 'reflex-support@righthandrobotics.com'
 
 import rospy
 from std_msgs.msg import Float64
+from std_msgs.msg import Bool
 from std_srvs.srv import Empty
 
 import reflex_msgs.msg
@@ -50,6 +51,9 @@ class ReflexHand(object):
         rospy.Subscriber(self.namespace + '/command_motor_force',
                          reflex_msgs.msg.ForceCommand, self._receive_force_cmd_cb)
         rospy.loginfo('ReFlex hand has started, waiting for commands...')
+
+        # Identifier to check whether the controllers are spawned successfully or not
+        self.controller_startup = False
 
     def _receive_cmd_cb(self, data):
         raise NotImplementedError
@@ -100,3 +104,12 @@ class ReflexHand(object):
         rospy.sleep(0.05)  # Lets other actions happen before beginning constant torque commands
         for ID, motor in self.motors.items():
             motor.enable_force_control()
+
+    # Callback to update the status of the controller status
+    def controller_status_cb(self, data):
+        self.controller_startup = data.data
+
+    # Helper function to check if the controller spawners has finished initiating
+    def get_controller_startup_status(self):
+        rospy.Subscriber('controller_spawner_done_init', Bool, self.controller_status_cb)
+        return self.controller_startup
