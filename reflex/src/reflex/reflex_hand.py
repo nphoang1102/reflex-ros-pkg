@@ -45,6 +45,8 @@ class ReflexHand(object):
         rospy.Subscriber('controller_spawner_done_init', Bool, self.controller_status_cb)
         while not self.get_controller_startup_status():
             pass
+        rospy.sleep(0.4) # brief delay just so all of the additional informations from the 
+        # dxl packages get printed out
 
         rospy.loginfo('Starting up the hand')
         self.motors = {self.namespace + '_f1': MotorClass(self.namespace + '_f1'),
