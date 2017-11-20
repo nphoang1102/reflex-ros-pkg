@@ -37,6 +37,15 @@ class ReflexHand(object):
         '''
         self.namespace = name
         rospy.init_node('reflex_hand')
+
+        # Identifier to check whether the controllers are spawned successfully or not
+        self.controller_startup = False
+
+        # Wait for the controller process to done completely
+        rospy.Subscriber('controller_spawner_done_init', Bool, self.controller_status_cb)
+        while not self.get_controller_startup_status():
+            pass
+
         rospy.loginfo('Starting up the hand')
         self.motors = {self.namespace + '_f1': MotorClass(self.namespace + '_f1'),
                        self.namespace + '_f2': MotorClass(self.namespace + '_f2'),
@@ -52,8 +61,6 @@ class ReflexHand(object):
                          reflex_msgs.msg.ForceCommand, self._receive_force_cmd_cb)
         rospy.loginfo('ReFlex hand has started, waiting for commands...')
 
-        # Identifier to check whether the controllers are spawned successfully or not
-        self.controller_startup = False
 
     def _receive_cmd_cb(self, data):
         raise NotImplementedError
@@ -111,5 +118,4 @@ class ReflexHand(object):
 
     # Helper function to check if the controller spawners has finished initiating
     def get_controller_startup_status(self):
-        rospy.Subscriber('controller_spawner_done_init', Bool, self.controller_status_cb)
         return self.controller_startup
