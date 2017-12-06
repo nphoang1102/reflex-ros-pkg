@@ -28,6 +28,8 @@ import reflex_msgs.msg
 class ReflexOneHand(ReflexHand):
     def __init__(self):
         super(ReflexOneHand, self).__init__('/reflex_one', ReflexOneMotor)
+        self.motor_names = rospy.get_param('~motors_list')
+        print self.motor_names
         self.hand_state_pub = rospy.Publisher(self.namespace + '/hand_state',
                                               reflex_msgs.msg.Hand, queue_size=10)
         rospy.Service(self.namespace + '/calibrate_fingers', Empty, self.calibrate)

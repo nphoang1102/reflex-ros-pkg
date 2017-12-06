@@ -18,11 +18,11 @@
     </node>
     <rosparam file="$(find reflex)/yaml/reflex_sf.yaml" command="load"/>
     <rosparam file="$(find reflex)/yaml/reflex_sf_zero_points.yaml" command="load"/>
-    <node name="reflex_sf_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+    <node name="reflex_one_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
           args="--manager=dxl_manager
-                --port reflex_sf_port 
+                --port reflex_one_port 
                 reflex_one_f1 reflex_one_f2 reflex_one_f3 reflex_one_preshape"
           output="screen"/>
-    <node name="reflex_sf_hand" pkg="reflex" type="reflex_sf_hand.py" required="true" output="screen"/>
+    <node name="reflex_one_hand" pkg="reflex" type="reflex_one_hand.py" required="true" output="screen"/>
         <rosparam param="motors_list">["f1", "f2", "f3", "preshape"]</rosparam>
 </launch>
