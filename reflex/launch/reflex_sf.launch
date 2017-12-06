@@ -10,7 +10,7 @@
                     port_name: "/dev/ttyUSB0"
                     baud_rate: 1000000
                     min_motor_id: 1
-                    max_motor_id: 4 <!-- These two serve as the input param for the dynamixel package to 
+                    max_motor_id: 5 <!-- These two serve as the input param for the dynamixel package to 
                     identify connected motors -->
                     update_rate: 20 <!-- Based on __update_motor_state function under dynamixel_serial_proxy,
                     this will determine how fast the motor state is update in Hz (same value as rospy.rate) -->
@@ -21,9 +21,9 @@
     <node name="reflex_sf_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
           args="--manager=dxl_manager
                 --port reflex_sf_port 
-                reflex_sf_f1 reflex_sf_f2 reflex_sf_f3 reflex_sf_preshape"
+                reflex_sf_f1 reflex_sf_f2 reflex_sf_f3 reflex_sf_k1 reflex_sf_k2"
           output="screen"/>
     <node name="reflex_sf_hand" pkg="reflex" type="reflex_sf_hand.py" required="true" output="screen"/>
-        <rosparam param="motors_list">["_f1", "_f2", "_f3", "_preshape"]</rosparam>
+        <rosparam param="motors_list">["_f1", "_f2", "_f3", "_k1", "_k2"]</rosparam>
 
 </launch>
