@@ -36,6 +36,7 @@ class ReflexSFMotor(Motor):
         self.zero_point = rospy.get_param(self.name + '/zero_point')
         self.MOTOR_TO_JOINT_GEAR_RATIO = rospy.get_param(self.name + '/motor_to_joint_gear_ratio')
         self.MOTOR_TO_JOINT_INVERTED = rospy.get_param(self.name + '/motor_to_joint_inverted')
+        self.MANUAL_CALIBRATE = rospy.get_param(self.name + '/manual_calibrate')
         self.motor_cmd_pub = rospy.Publisher(name + '/command', Float64, queue_size=10)
         self.set_speed_service = rospy.ServiceProxy(name + '/set_speed', SetSpeed)
         self.torque_enable_service = rospy.ServiceProxy(name + '/torque_enable', TorqueEnable)
@@ -51,6 +52,9 @@ class ReflexSFMotor(Motor):
 
     def get_gear_ratio(self):
         return self.MOTOR_TO_JOINT_GEAR_RATIO
+
+    def get_manual_calibrate(self):
+        return self.MANUAL_CALIBRATE
 
     def set_motor_angle(self, goal_pos):
         '''

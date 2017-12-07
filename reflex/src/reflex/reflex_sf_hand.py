@@ -161,24 +161,27 @@ motor, or 'q' to indicate that the zero point has been reached\n")
 
         # First thing, manually calibrate the preshape joint, only when needed
         if (manual_start):
-            rospy.loginfo("Start manual calibrating %s.", preshape.lstrip("/"))
-            command = raw_input("Type 't' to tighten motor, 'l' to loosen \
-            motor, or 'q' to indicate that the zero point has been reached\n")
-            while not command.lower() == 'q':
-                if command.lower() == 't' or command.lower() == 'tt':
-                    print "Tightening motor " + preshape
-                    self.motors[preshape].tighten(0.35 * len(command) - 0.3)
-                elif command.lower() == 'l' or command.lower() == 'll':
-                    print "Loosening motor " + preshape
-                    self.motors[preshape].loosen(0.35 * len(command) - 0.3)
-                else:
-                    print "Didn't recognize that command, use 't', 'l', or 'q'"
-                command = raw_input("Tighten: 't'\tLoosen: 'l'\tDone: 'q'\n")
-            rospy.loginfo("Manual calibration done, start auto calibrate the rest of the fingers.")
+            for motor in sorted(self.motors):
+                if (not motor.get_manual_calibrate()):
+                    break
+                rospy.loginfo("Start manual calibrating %s.", motor.get_name())
+                command = raw_input("Type 't' to tighten motor, 'l' to loosen \
+                motor, or 'q' to indicate that the zero point has been reached\n")
+                while not command.lower() == 'q':
+                    if command.lower() == 't' or command.lower() == 'tt':
+                        print "Tightening motor " + preshape
+                        self.motors[preshape].tighten(0.35 * len(command) - 0.3)
+                    elif command.lower() == 'l' or command.lower() == 'll':
+                        print "Loosening motor " + preshape
+                        self.motors[preshape].loosen(0.35 * len(command) - 0.3)
+                    else:
+                        print "Didn't recognize that command, use 't', 'l', or 'q'"
+                    command = raw_input("Tighten: 't'\tLoosen: 'l'\tDone: 'q'\n")
+                rospy.loginfo("Manual calibration done, start auto calibrate the rest of the fingers.")
 
         # Goes through the fingers first, the preshape is still tricky
         for motor in sorted(self.motors):
-            if (motor == preshape):
+            if (motor.get_manual_calibrate()):
                 zero_pos[preshape.lstrip("/")] = dict(zero_point=self.motors[self.namespace + '_preshape'].get_current_raw_motor_angle())
                 break
 

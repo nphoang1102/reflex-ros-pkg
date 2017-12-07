@@ -41,6 +41,9 @@ class Motor(object):
         self._motor_msg = reflex_msgs.msg.Motor()
         self._in_control_force_mode = False
 
+    def get_name(self):
+        return self.name
+
     def get_current_joint_angle(self):
         return self._motor_msg.joint_angle
 
