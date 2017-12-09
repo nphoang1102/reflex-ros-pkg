@@ -24,6 +24,6 @@
                 reflex_sf_f1 reflex_sf_f2 reflex_sf_f3 reflex_sf_k1 reflex_sf_k2"
           output="screen"/>
     <node name="reflex_sf_hand" pkg="reflex" type="reflex_sf_hand.py" required="true" output="screen"/>
-        <rosparam param="motors_list">["_f1", "_f2", "_f3", "_k1", "_k2"]</rosparam>
+        <rosparam param="motors_list">["f1", "f2", "f3", "k1", "k2"]</rosparam>
 
 </launch>

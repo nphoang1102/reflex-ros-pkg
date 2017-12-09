@@ -48,11 +48,17 @@ class ReflexHand(object):
         rospy.sleep(0.4) # brief delay just so all of the additional informations from the 
         # dxl packages get printed out
 
+        # Start initiating motor controllers based on the input list from the launch file
         rospy.loginfo('Starting up the hand')
-        self.motor_names = rospy.get_param('motors_list')
+        self.input_motors = rospy.get_param('motors_list')
         self.motors = dict()
-        for name in self.motor_names:
-            self.motors[self.namespace + name] = MotorClass(self.namespace + name)
+        self.motor_names = []
+        for motor in self.input_motors:
+            name = self.namespace + "_" + motor
+            self.motors[name] = MotorClass(name)
+            self.motor_names.append(name)
+
+        # Setup subscriber for sending out messages to motors
         rospy.Subscriber(self.namespace + '/command',
                          reflex_msgs.msg.Command, self._receive_cmd_cb)
         rospy.Subscriber(self.namespace + '/command_position',
@@ -77,10 +83,12 @@ class ReflexHand(object):
         raise NotImplementedError
 
     def set_angles(self, pose):
+        # for motor in self.motor_names
         self.motors[self.namespace + '_f1'].set_motor_angle(pose.f1)
         self.motors[self.namespace + '_f2'].set_motor_angle(pose.f2)
         self.motors[self.namespace + '_f3'].set_motor_angle(pose.f3)
-        self.motors[self.namespace + '_preshape'].set_motor_angle(pose.preshape)
+        self.motors[self.namespace + '_k1'].set_motor_angle(pose.k1)
+        self.motors[self.namespace + '_k2'].set_motor_angle(pose.k2)
 
     def set_velocities(self, velocity):
         self.motors[self.namespace + '_f1'].set_motor_velocity(velocity.f1)

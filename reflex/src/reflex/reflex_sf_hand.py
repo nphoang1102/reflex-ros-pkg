@@ -79,8 +79,7 @@ class ReflexSFHand(ReflexHand):
     def _publish_hand_state(self):
         state = reflex_msgs.msg.Hand()
         for i in range(len(self.motor_names)):
-            current_motor_name = self.namespace + self.motor_names[i]
-            state.motor[i] = self.motors[current_motor_name].get_motor_msg()
+            state.motor[i] = self.motors[self.motor_names[i]].get_motor_msg()
         self.hand_state_pub.publish(state)
 
     def calibrate(self, data=None):
@@ -233,8 +232,7 @@ motor, or 'q' to indicate that the zero point has been reached\n")
     def _zero_current_pose(self):
         data = dict()
         for motor in self.motor_names:
-            current_motor_name = self.namespace + motor
-            data[current_motor_name] = dict(zero_point=self.motors[current_motor_name].get_current_raw_motor_angle())
+            data[motor[1:]] = dict(zero_point=self.motors[motor].get_current_raw_motor_angle())
         self._write_zero_point_data_to_file('reflex_sf_zero_points.yaml', data)
 
 
