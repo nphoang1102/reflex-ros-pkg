@@ -83,30 +83,20 @@ class ReflexHand(object):
         raise NotImplementedError
 
     def set_angles(self, pose):
-        # for motor in self.motor_names
-        self.motors[self.namespace + '_f1'].set_motor_angle(pose.f1)
-        self.motors[self.namespace + '_f2'].set_motor_angle(pose.f2)
-        self.motors[self.namespace + '_f3'].set_motor_angle(pose.f3)
-        self.motors[self.namespace + '_k1'].set_motor_angle(pose.k1)
-        self.motors[self.namespace + '_k2'].set_motor_angle(pose.k2)
+        for motor_name in self.input_motors:
+            self.motors[motor_name].set_motor_angle(getattr(pose, motor_name))
 
     def set_velocities(self, velocity):
-        self.motors[self.namespace + '_f1'].set_motor_velocity(velocity.f1)
-        self.motors[self.namespace + '_f2'].set_motor_velocity(velocity.f2)
-        self.motors[self.namespace + '_f3'].set_motor_velocity(velocity.f3)
-        self.motors[self.namespace + '_preshape'].set_motor_velocity(velocity.preshape)
+        for motor_name in self.input_motors:
+            self.motors[motor_name].set_motor_angle(getattr(velocity, motor_name))
 
     def set_speeds(self, speed):
-        self.motors[self.namespace + '_f1'].set_motor_speed(speed.f1)
-        self.motors[self.namespace + '_f2'].set_motor_speed(speed.f2)
-        self.motors[self.namespace + '_f3'].set_motor_speed(speed.f3)
-        self.motors[self.namespace + '_preshape'].set_motor_speed(speed.preshape)
+        for motor_name in self.input_motors:
+            self.motors[motor_name].set_motor_angle(getattr(speed, motor_name))
 
     def set_force_cmds(self, torque):
-        self.motors[self.namespace + '_f1'].set_force_cmd(torque.f1)
-        self.motors[self.namespace + '_f2'].set_force_cmd(torque.f2)
-        self.motors[self.namespace + '_f3'].set_force_cmd(torque.f3)
-        self.motors[self.namespace + '_preshape'].set_force_cmd(torque.preshape)
+        for motor_name in self.input_motors:
+            self.motors[motor_name].set_motor_angle(getattr(torque, motor_name))
 
     def reset_speeds(self):
         for ID, motor in self.motors.items():

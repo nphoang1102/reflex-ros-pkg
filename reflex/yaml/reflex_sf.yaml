@@ -43,7 +43,7 @@ reflex_sf_f3:
         type: JointPositionController
     joint_name: reflex_sf_f3
     manual_calibrate: False
-    motor_to_joint_inverted: True
+    motor_to_joint_inverted: False
     motor_to_joint_gear_ratio: 1.42
     default_motor_speed: 4.5
     max_motor_speed: 6.0
