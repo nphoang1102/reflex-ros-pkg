@@ -12,6 +12,7 @@ class MyWidgetWC(QWidget):
     def __init__(self):
         super(MyWidgetWC, self).__init__()
         self.command_pub = rospy.Publisher('/reflex_sf/command_position', PoseCommand, queue_size=1)
+        self.command_pub_sim = rospy.Publisher('/reflex_sf/hand_state', Hand, queue_size=1)
         # Constantly capture the current hand state
         rospy.Subscriber('/reflex_sf/hand_state', Hand, self.hand_state_cb)
         #rospy.init_node('listener', anonymous=True)
@@ -102,6 +103,14 @@ class MyWidgetWC(QWidget):
         self.hbox_tick.addWidget(self.tick_f4)
         self.hbox_tick.addStretch()
 
+        self.tick_f1_state = 0
+        self.tick_f2_state = 0
+        self.tick_f3_state = 0
+        self.tick_f4_state = 0
+        self.tick_f1.stateChanged.connect(lambda:self.tickchange(self.tick_f1))
+        self.tick_f2.stateChanged.connect(lambda:self.tickchange(self.tick_f2))
+        self.tick_f3.stateChanged.connect(lambda:self.tickchange(self.tick_f3))
+        self.tick_f4.stateChanged.connect(lambda:self.tickchange(self.tick_f4))
 
 ########### Command Row Button ############################################################################
         # Command row
@@ -114,6 +123,13 @@ class MyWidgetWC(QWidget):
         self.hbox_command.addWidget(self.go_button)
         self.hbox_command.addWidget(self.home_button)
         self.hbox_command.addWidget(self.re_button)
+########### Combo section ############################################################################
+        self.combo_label = QLabel("Targeted Device")
+        self.combo = QComboBox(self)
+        self.combo.addItem("ReflexSF")
+        self.combo.addItem("MQP Hand")
+        self.combo.addItem("Rviz/Gazebo Simulation")
+        self.combo.addItem("Lul")
 ########### Calibrate section ############################################################################
         # # Calibrate f1 row
         # self.cali_f1_label = QLabel("Calibrate f1")
@@ -182,6 +198,7 @@ class MyWidgetWC(QWidget):
         # self.fbox.addRow(self.cali_f4_label,self.hbox_cali_f4)
         self.fbox.addRow(self.listlabel,self.listWidget)
         self.fbox.addRow(self.list_control_label,self.list_control)
+        self.fbox.addRow(self.combo_label,self.combo)
 
         # Connect singal when slider change to function respectively to change value of label
         self.finger_slider_1.valueChanged.connect(self.valuechange1)
@@ -348,12 +365,24 @@ class MyWidgetWC(QWidget):
             while not ((abs(self.current_angle[0] - pose.f1)<0.1) and (abs(self.current_angle[1] - pose.f2)<0.1) and (abs(self.current_angle[2] - pose.f3)<0.1) and (abs(self.current_angle[3] - pose.preshape)<0.1)):
                 print "test"
             #rospy.sleep(2.)
+######### tickchange for updating tick ###############################################################
 
 ######### valuechange for updating goal label ###############################################################
     def valuechange1(self):
         #self.dumbnum = self.dumbnum + 1;
         float_value = float(self.finger_slider_1.value())/100.0
         self.value_slider_1.setText("%2.2f" % float_value)
+        if self.tick_f1_state:
+            if self.tick_f2_state:
+                self.value_slider_2.setText("%2.2f" % float_value)
+                self.finger_slider_2.setValue(self.finger_slider_1.value())
+            if self.tick_f3_state:
+                self.value_slider_3.setText("%2.2f" % float_value)
+                self.finger_slider_3.setValue(self.finger_slider_1.value())
+            if self.tick_f4_state:
+                self.value_slider_4.setText("%2.2f" % float_value)
+                self.finger_slider_4.setValue(self.finger_slider_1.value())
+
         #print "test time" + str(self.dumbnum)
 
     def valuechange2(self):
@@ -369,17 +398,63 @@ class MyWidgetWC(QWidget):
         self.value_slider_4.setText("%2.2f" % float_value)
 
 #############################################################################################################
-
+    def tickchange(self,b):
+        if b.text() == "F1":
+            if b.isChecked() == True:
+                self.tick_f1_state = 1
+            else:
+                self.tick_f1_state = 0
+        if b.text() == "F2":
+            if b.isChecked() == True:
+                self.tick_f2_state = 1
+            else:
+                self.tick_f2_state = 0
+        if b.text() == "F3":
+            if b.isChecked() == True:
+                self.tick_f3_state = 1
+            else:
+                self.tick_f3_state = 0
+        if b.text() == "Preshape":
+            if b.isChecked() == True:
+                self.tick_f4_state = 1
+            else:
+                self.tick_f4_state = 0
+        print(self.tick_f1_state)
 
 ######### Command Button handler ############################################################################
     def handleButtonGo(self):
-        tar_f1 = float(self.finger_slider_1.value())/100.0
-        tar_f2 = float(self.finger_slider_2.value())/100.0
-        tar_f3 = float(self.finger_slider_3.value())/100.0
-        tar_f4 = float(self.finger_slider_4.value())/100.0
-        poseTarget = PoseCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,preshape=tar_f4)
-        self.command_pub.publish(poseTarget)
-        print "Go Button Click"
+        # tar_f1 = float(self.finger_slider_1.value())/100.0
+        # tar_f2 = float(self.finger_slider_2.value())/100.0
+        # tar_f3 = float(self.finger_slider_3.value())/100.0
+        # tar_f4 = float(self.finger_slider_4.value())/100.0
+        # poseTarget = PoseCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,preshape=tar_f4)
+        # self.command_pub.publish(poseTarget)
+        # print "Go Button Click"
+        if self.combo.currentText() == "Rviz/Gazebo Simulation":
+            tar_f1 = float(self.value_slider_1.toPlainText())
+            tar_f2 = float(self.value_slider_2.toPlainText())
+            tar_f3 = float(self.value_slider_3.toPlainText())
+            tar_f4 = float(self.value_slider_4.toPlainText())
+            print "Go Button Click Simluation"
+            print(tar_f1,tar_f2,tar_f3,tar_f4)
+            hand = Hand()
+            hand.motor[0].joint_angle = tar_f1
+            hand.motor[1].joint_angle = tar_f2
+            hand.motor[2].joint_angle = tar_f3
+            hand.motor[3].joint_angle = tar_f4
+            self.command_pub_sim.publish(hand)
+
+
+        else:
+            tar_f1 = float(self.value_slider_1.toPlainText())
+            tar_f2 = float(self.value_slider_2.toPlainText())
+            tar_f3 = float(self.value_slider_3.toPlainText())
+            tar_f4 = float(self.value_slider_4.toPlainText())
+            print "Go Button Click with target"
+            print(tar_f1,tar_f2,tar_f3,tar_f4)
+            poseTarget = PoseCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,preshape=tar_f4)
+            self.command_pub.publish(poseTarget)
+            #print "Go Button Click"
 
     def handleButtonHome(self):
         poseTarget = PoseCommand(f1=0.0,f2=0.0,f3=0.0,preshape=0.0)
