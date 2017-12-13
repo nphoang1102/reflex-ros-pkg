@@ -33,21 +33,21 @@ class MyPlugin(Plugin):
         #     print 'unknowns: ', unknowns
 
         # Create QWidget
-        self._widget = MyWidgetWC()
-        self._widget.setObjectName('MyPosUI')
-        self._widget2 = MyWidgetVel()
-        self._widget2.setObjectName('MyVelUI')
-        self._widget3 = MyWidgetVelPos()
-        self._widget3.setObjectName('MyPosVelUI')
-        self._widget4 = MyWidgetCali()
-        self._widget4.setObjectName('MyCali')
+        # self._widget = MyWidgetWC()
+        # self._widget.setObjectName('MyPosUI')
+        # self._widget2 = MyWidgetVel()
+        # self._widget2.setObjectName('MyVelUI')
+        # self._widget3 = MyWidgetVelPos()
+        # self._widget3.setObjectName('MyPosVelUI')
+        # self._widget4 = MyWidgetCali()
+        # self._widget4.setObjectName('MyCali')
         self._widget5 = ServerGui()
         self._widget5.setObjectName('MyServer')
 
-        self._widget.setWindowTitle("Position Control")
-        self._widget2.setWindowTitle("Velocity Control")
-        self._widget3.setWindowTitle("Position and Velocity Control")
-        self._widget4.setWindowTitle('Calibration')
+        # self._widget.setWindowTitle("Position Control")
+        # self._widget2.setWindowTitle("Velocity Control")
+        # self._widget3.setWindowTitle("Position and Velocity Control")
+        # self._widget4.setWindowTitle('Calibration')
         self._widget5.setWindowTitle('Server')
         
 
@@ -77,10 +77,10 @@ class MyPlugin(Plugin):
 
         # Add widget to the user interface
         
-        context.add_widget(self._widget)
-        context.add_widget(self._widget2)
-        context.add_widget(self._widget3)
-        context.add_widget(self._widget4)
+        # context.add_widget(self._widget)
+        # context.add_widget(self._widget2)
+        # context.add_widget(self._widget3)
+        # context.add_widget(self._widget4)
         context.add_widget(self._widget5)
 
     def shutdown_plugin(self):

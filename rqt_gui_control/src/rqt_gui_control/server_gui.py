@@ -140,7 +140,7 @@ class ServerGui(QWidget):
         port = 12345                # Reserve a port for your service.
         s.bind((host, port))        # Bind to the port
         print(host, "  and  ", port)
-        with open('/home/tvm/hand_mqp_script/unbend.txt', 'w') as file:
+        with open('/home/mqp-team/hand_mqp_script/unbend.txt', 'w') as file:
             file.write('\n')
         s.listen(5)                 # Now wait for client connection.
         i = 0
@@ -150,7 +150,7 @@ class ServerGui(QWidget):
             #print("Debug: Server is listening")
             data = c.recv(1024).decode()
             print("Client sends: ", data)
-            with open('/home/tvm/hand_mqp_script/unbend.txt', 'a') as file:
+            with open('/home/mqp-team/hand_mqp_script/unbend.txt', 'a') as file:
                 file.write(data)
             mess = 'Thank you for connecting'
             c.send(mess.encode())
@@ -171,7 +171,7 @@ class ServerGui(QWidget):
         port = 12345                # Reserve a port for your service.
         s.bind((host, port))        # Bind to the port
         print(host, "  and  ", port)
-        with open('/home/tvm/hand_mqp_script/bend.txt', 'w') as file:
+        with open('/home/mqp-team/hand_mqp_script/bend.txt', 'w') as file:
             file.write('\n')
         s.listen(5)                 # Now wait for client connection.
         i = 0
@@ -181,7 +181,7 @@ class ServerGui(QWidget):
             #print("Debug: Server is listening")
             data = c.recv(1024).decode()
             print("Client sends: ", data)
-            with open('/home/tvm/hand_mqp_script/bend.txt', 'a') as file:
+            with open('/home/mqp-team/hand_mqp_script/bend.txt', 'a') as file:
                 file.write(data)
             mess = 'Thank you for connecting'
             c.send(mess.encode())
@@ -204,7 +204,7 @@ class ServerGui(QWidget):
 
 
 def animate(i):
-    graph_data = open('/home/tvm/hand_mqp_script/file.txt','r').read()
+    graph_data = open('/home/mqp-team/hand_mqp_script/file.txt','r').read()
     lines = graph_data.split('\n')
     d1new = [0,0,0,0,0]
     d1 = []

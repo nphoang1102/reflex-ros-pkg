@@ -84,19 +84,19 @@ class ReflexHand(object):
 
     def set_angles(self, pose):
         for motor_name in self.input_motors:
-            self.motors[motor_name].set_motor_angle(getattr(pose, motor_name))
+            self.motors[self.namespace+"_"+motor_name].set_motor_angle(getattr(pose, motor_name))
 
     def set_velocities(self, velocity):
         for motor_name in self.input_motors:
-            self.motors[motor_name].set_motor_angle(getattr(velocity, motor_name))
+            self.motors[self.namespace+"_"+motor_name].set_motor_angle(getattr(velocity, motor_name))
 
     def set_speeds(self, speed):
         for motor_name in self.input_motors:
-            self.motors[motor_name].set_motor_angle(getattr(speed, motor_name))
+            self.motors[self.namespace+"_"+motor_name].set_motor_angle(getattr(speed, motor_name))
 
     def set_force_cmds(self, torque):
         for motor_name in self.input_motors:
-            self.motors[motor_name].set_motor_angle(getattr(torque, motor_name))
+            self.motors[self.namespace+"_"+motor_name].set_motor_angle(getattr(torque, motor_name))
 
     def reset_speeds(self):
         for ID, motor in self.motors.items():
