@@ -1,0 +1,1 @@
+This folder contain Arduino Code upload to the new glove hardware, the Arduino run ros packages on itself and send 3 int back to a topic. Then reflex can just listen to that topic for control use.

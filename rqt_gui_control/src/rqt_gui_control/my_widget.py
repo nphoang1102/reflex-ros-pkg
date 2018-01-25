@@ -3,6 +3,8 @@ from python_qt_binding.QtWidgets import * #QWidget, QToolTip,QPushButton,QLabel,
 from python_qt_binding.QtGui import * #QFont,QPalette, QColor
 
 from std_msgs.msg import String
+from std_msgs.msg import Int16MultiArray
+
 from reflex_msgs.msg import PoseCommand
 from rqt_service.srv import SendTwoInt
 from reflex_msgs.msg import Hand
@@ -15,6 +17,7 @@ class MyWidgetWC(QWidget):
         self.command_pub_sim = rospy.Publisher('/reflex_sf/hand_state', Hand, queue_size=1)
         # Constantly capture the current hand state
         rospy.Subscriber('/reflex_sf/hand_state', Hand, self.hand_state_cb)
+        rospy.Subscriber('/chatter',Int16MultiArray, self.received_int)
         #rospy.init_node('listener', anonymous=True)
 
         self.initUI()
@@ -129,7 +132,29 @@ class MyWidgetWC(QWidget):
         self.combo.addItem("ReflexSF")
         self.combo.addItem("MQP Hand")
         self.combo.addItem("Rviz/Gazebo Simulation")
-        self.combo.addItem("Lul")
+############ Glove Section #############################################################################
+        self.glove_label = QLabel("Glove Interface")
+
+
+        self.tick_glove = QCheckBox("ON/OFF")
+        self.tick_glove_state = 0
+        self.tick_glove.stateChanged.connect(lambda:self.tickchange(self.tick_glove))
+
+        self.value_glove_1 = QLabel("x")
+        self.value_glove_1.setMaximumSize(80,20)
+
+        self.value_glove_2 = QLabel("x")
+        self.value_glove_2.setMaximumSize(80,20)
+
+        self.value_glove_3 = QLabel("x")
+        self.value_glove_3.setMaximumSize(80,20)
+
+        self.hbox_glove = QHBoxLayout()
+        self.hbox_glove.addWidget(self.tick_glove)
+        self.hbox_glove.addWidget(self.value_glove_1)
+        self.hbox_glove.addWidget(self.value_glove_2)
+        self.hbox_glove.addWidget(self.value_glove_3)
+        
 ########### Calibrate section ############################################################################
         # # Calibrate f1 row
         # self.cali_f1_label = QLabel("Calibrate f1")
@@ -199,6 +224,7 @@ class MyWidgetWC(QWidget):
         self.fbox.addRow(self.listlabel,self.listWidget)
         self.fbox.addRow(self.list_control_label,self.list_control)
         self.fbox.addRow(self.combo_label,self.combo)
+        self.fbox.addRow(self.glove_label,self.hbox_glove)
 
         # Connect singal when slider change to function respectively to change value of label
         self.finger_slider_1.valueChanged.connect(self.valuechange1)
@@ -419,7 +445,15 @@ class MyWidgetWC(QWidget):
                 self.tick_f4_state = 1
             else:
                 self.tick_f4_state = 0
-        print(self.tick_f1_state)
+        if b.text() == "ON/OFF":
+            if b.isChecked() == True:
+                self.tick_glove_state = 1
+            else:
+                self.tick_glove_state = 0 
+                self.value_glove_1.setText("x")
+                self.value_glove_2.setText("x")
+                self.value_glove_3.setText("x")
+        #print(self.tick_f1_state)
 
 ######### Command Button handler ############################################################################
     def handleButtonGo(self):
@@ -477,4 +511,44 @@ class MyWidgetWC(QWidget):
         self.current_angle[1] = hand.motor[1].joint_angle
         self.current_angle[2] = hand.motor[2].joint_angle
         self.current_angle[3] = hand.motor[3].joint_angle
+
+    # Receive messages from 
+    def received_int(self, value_received):
+        scaled_float_1 = 3.0-(float(value_received.data[0])-300.0)/100.0
+        scaled_float_2 = float(value_received.data[1])/400
+        scaled_float_3 = 3.0 - (float(value_received.data[2])-60)/70
+        if (self.tick_glove_state == 1):
+            # Scale raw value into readable value
+            #print(scaled_float_1)
+            self.value_glove_1.setText("%2.2f" % scaled_float_1)
+            self.value_glove_2.setText("%2.2f" % scaled_float_2)
+            self.value_glove_3.setText("%2.2f" % scaled_float_3)
+
+            # Based on the Combo box decided what to do with the value
+            if (self.combo.currentText() == "Rviz/Gazebo Simulation"):
+                #print(scaled_float_1)
+                tar_f1 = scaled_float_1
+                tar_f2 = scaled_float_1
+                tar_f3 = scaled_float_1
+                tar_f4 = scaled_float_2
+                #print "Go Button Click Simluation"
+                #print(tar_f1,tar_f2,tar_f3,tar_f4)
+                hand = Hand()
+                hand.motor[0].joint_angle = tar_f1
+                hand.motor[1].joint_angle = tar_f2
+                hand.motor[2].joint_angle = tar_f3
+                hand.motor[3].joint_angle = tar_f4
+                self.command_pub_sim.publish(hand)
+            else: 
+                tar_f1 = scaled_float_1
+                tar_f2 = scaled_float_1
+                tar_f3 = scaled_float_3
+                tar_f4 = scaled_float_2
+                print "Go Button Click with target"
+                print(tar_f1,tar_f2,tar_f3,tar_f4)
+                poseTarget = PoseCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,preshape=tar_f4)
+                self.command_pub.publish(poseTarget)
+                
+
+
 

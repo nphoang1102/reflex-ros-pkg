@@ -33,8 +33,8 @@ class MyPlugin(Plugin):
         #     print 'unknowns: ', unknowns
 
         # Create QWidget
-        # self._widget = MyWidgetWC()
-        # self._widget.setObjectName('MyPosUI')
+        self._widget = MyWidgetWC()
+        self._widget.setObjectName('MyPosUI')
         # self._widget2 = MyWidgetVel()
         # self._widget2.setObjectName('MyVelUI')
         # self._widget3 = MyWidgetVelPos()
@@ -77,7 +77,7 @@ class MyPlugin(Plugin):
 
         # Add widget to the user interface
         
-        # context.add_widget(self._widget)
+        context.add_widget(self._widget)
         # context.add_widget(self._widget2)
         # context.add_widget(self._widget3)
         # context.add_widget(self._widget4)
