@@ -39,8 +39,8 @@ class MyPlugin(Plugin):
         # self._widget2.setObjectName('MyVelUI')
         # self._widget3 = MyWidgetVelPos()
         # self._widget3.setObjectName('MyPosVelUI')
-        # self._widget4 = MyWidgetCali()
-        # self._widget4.setObjectName('MyCali')
+        self._widget4 = MyWidgetCali()
+        self._widget4.setObjectName('MyCali')
         self._widget5 = ServerGui()
         self._widget5.setObjectName('MyServer')
 
@@ -80,7 +80,7 @@ class MyPlugin(Plugin):
         context.add_widget(self._widget)
         # context.add_widget(self._widget2)
         # context.add_widget(self._widget3)
-        # context.add_widget(self._widget4)
+        context.add_widget(self._widget4)
         context.add_widget(self._widget5)
 
     def shutdown_plugin(self):

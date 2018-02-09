@@ -514,9 +514,9 @@ class MyWidgetWC(QWidget):
 
     # Receive messages from 
     def received_int(self, value_received):
-        scaled_float_1 = 3.0-(float(value_received.data[0])-300.0)/100.0
-        scaled_float_2 = float(value_received.data[1])/400
-        scaled_float_3 = 3.0 - (float(value_received.data[2])-60)/70
+        scaled_float_1 = 3.0-(float(value_received.data[0])-450.0)/100.0
+        scaled_float_2 = 3.0-(float(value_received.data[1])-500.0)/100.0 -0.5
+        scaled_float_3 = 3.0 - (float(value_received.data[2])-440)/80.0 -0.5
         if (self.tick_glove_state == 1):
             # Scale raw value into readable value
             #print(scaled_float_1)
@@ -527,10 +527,10 @@ class MyWidgetWC(QWidget):
             # Based on the Combo box decided what to do with the value
             if (self.combo.currentText() == "Rviz/Gazebo Simulation"):
                 #print(scaled_float_1)
-                tar_f1 = scaled_float_1
-                tar_f2 = scaled_float_1
+                tar_f1 = scaled_float_2
+                tar_f2 = scaled_float_2
                 tar_f3 = scaled_float_1
-                tar_f4 = scaled_float_2
+                tar_f4 = scaled_float_3
                 #print "Go Button Click Simluation"
                 #print(tar_f1,tar_f2,tar_f3,tar_f4)
                 hand = Hand()
@@ -544,8 +544,8 @@ class MyWidgetWC(QWidget):
                 tar_f2 = scaled_float_1
                 tar_f3 = scaled_float_3
                 tar_f4 = scaled_float_2
-                print "Go Button Click with target"
-                print(tar_f1,tar_f2,tar_f3,tar_f4)
+                #print "Go Button Click with target"
+                #print(tar_f1,tar_f2,tar_f3,tar_f4)
                 poseTarget = PoseCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,preshape=tar_f4)
                 self.command_pub.publish(poseTarget)
                 
