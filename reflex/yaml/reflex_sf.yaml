@@ -5,7 +5,7 @@ reflex_sf_f1:
         type: JointPositionController
     joint_name: reflex_sf_f1
     manual_calibrate: False
-    motor_to_joint_inverted: False
+    motor_to_joint_inverted: True
     motor_to_joint_gear_ratio: 1.42
     default_motor_speed: 4.5
     max_motor_speed: 6.0
@@ -24,7 +24,7 @@ reflex_sf_f2:
         type: JointPositionController
     joint_name: reflex_sf_f2
     manual_calibrate: False
-    motor_to_joint_inverted: True
+    motor_to_joint_inverted: False
     motor_to_joint_gear_ratio: 1.42
     default_motor_speed: 4.5
     max_motor_speed: 6.0

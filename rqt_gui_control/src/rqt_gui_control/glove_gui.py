@@ -8,22 +8,25 @@ from std_msgs.msg import Int16MultiArray
 from reflex_msgs.msg import PoseCommand
 from rqt_service.srv import SendTwoInt
 from reflex_msgs.msg import Hand
+import os
+import sys
 
-class MyWidgetWC(QWidget):
+class GloveWidget(QWidget):
     
     def __init__(self):
-        super(MyWidgetWC, self).__init__()
+        super(GloveWidget, self).__init__()
         self.command_pub = rospy.Publisher('/reflex_sf/command_position', PoseCommand, queue_size=1)
         self.command_pub_sim = rospy.Publisher('/reflex_sf/hand_state', Hand, queue_size=1)
         # Constantly capture the current hand state
         rospy.Subscriber('/reflex_sf/hand_state', Hand, self.hand_state_cb)
         rospy.Subscriber('/chatter',Int16MultiArray, self.received_int)
         #rospy.init_node('listener', anonymous=True)
-
+        self.currentGrasp = []
         self.initUI()
         
     def initUI(self):
 
+        
 ################## Position Control GUI ########################################################################
         #Finger 1 row
         self.finger_label_1 = QLabel("Goal for f1")
@@ -68,8 +71,8 @@ class MyWidgetWC(QWidget):
         self.hbox_f3.addWidget(self.finger_slider_3)
         self.hbox_f3.addWidget(self.value_slider_3)
 
-        #Preshape k1
-        self.finger_label_4 = QLabel("Goal for f_preshape k1")
+        #Finger 4
+        self.finger_label_4 = QLabel("Goal for f_preshape")
         #finger_slider_4 = QLineEdit()
         self.finger_slider_4 = QSlider(1)
         self.finger_slider_4.setMinimum(0)
@@ -81,20 +84,6 @@ class MyWidgetWC(QWidget):
         self.hbox_f4 = QHBoxLayout()
         self.hbox_f4.addWidget(self.finger_slider_4)
         self.hbox_f4.addWidget(self.value_slider_4)
-
-        #Preshape k2
-        self.finger_label_5 = QLabel("Goal for f_preshape")
-        #finger_slider_4 = QLineEdit()
-        self.finger_slider_5 = QSlider(1)
-        self.finger_slider_5.setMinimum(0)
-        self.finger_slider_5.setMaximum(400)
-        self.finger_slider_5.setValue(0)
-
-        self.value_slider_5 = QTextEdit("0.00")
-        self.value_slider_5.setMaximumSize(80,20)
-        self.hbox_f5 = QHBoxLayout()
-        self.hbox_f5.addWidget(self.finger_slider_5)
-        self.hbox_f5.addWidget(self.value_slider_5)
 
 ###########################################################################################################
         # Testing
@@ -202,22 +191,22 @@ class MyWidgetWC(QWidget):
         # self.hbox_cali_f4.addWidget(self.cali_f4_tight_button)
         # self.hbox_cali_f4.addWidget(self.cali_f4_loosen_button)
 ##########################################################################################################
-        self.listPose = []
-        pose0 = PoseCommand(f1=0.0,f2=0.0,f3=0.0,k1=0.0,k2=0.0)
-        self.listPose.append(pose0)
+        #List of grasp in data folder
+        self.grasplist = []
+        self.filename = []
         #Test List view
-        self.listWidget = QListWidget()
         
-        item = QListWidgetItem("Pos(  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  ,  '%2.2f',  '%2.2f'  )" % (pose0.f1,pose0.f2,pose0.f3,pose0.k1,pose0.k2))
-        self.listWidget.addItem(item)
+        self.readGrasp()
+        
 
         self.listlabel = QLabel("List waypoint")
 
         #List Control
-        self.list_control_label = QLabel("Waypoint Control")
-        self.list_control_save_button = QPushButton("Save")
+        
+        self.list_control_label = QLabel("Grasp Control")
+        self.list_control_save_button = QPushButton("Save Grasp")
         self.list_control_delete_button = QPushButton("Remove")
-        self.list_control_go_button = QPushButton("Go waypoints")
+        self.list_control_go_button = QPushButton("Execution")
         self.list_control = QHBoxLayout()
         self.list_control.addWidget(self.list_control_save_button)
         self.list_control.addWidget(self.list_control_delete_button)
@@ -225,28 +214,29 @@ class MyWidgetWC(QWidget):
 ############ Adding rows and set up singal for button ####################################################
         #QFormLayout similar to HBox but you know it look like form, add everything to FormLayout
         self.fbox = QFormLayout()
-        self.fbox.addRow(self.finger_label_1,self.hbox_f1)
-        self.fbox.addRow(self.finger_label_2,self.hbox_f2)
-        self.fbox.addRow(self.finger_label_3,self.hbox_f3)
+        self.fbox.addRow(self.combo_label,self.combo)
+        self.fbox.addRow(self.glove_label,self.hbox_glove)
+        
+        # self.fbox.addRow(self.finger_label_1,self.hbox_f1)
+        # self.fbox.addRow(self.finger_label_2,self.hbox_f2)
+        # self.fbox.addRow(self.finger_label_3,self.hbox_f3)
         self.fbox.addRow(self.finger_label_4,self.hbox_f4)
-        self.fbox.addRow(self.finger_label_5,self.hbox_f5)
-        self.fbox.addRow(self.coupling_label,self.hbox_tick)
-        self.fbox.addRow(self.command_label,self.hbox_command)
-        # self.fbox.addRow(self.cali_f1_label,self.hbox_cali_f1)
+        # self.fbox.addRow(self.coupling_label,self.hbox_tick)
+        # self.fbox.addRow(self.command_label,self.hbox_command)
+        # # self.fbox.addRow(self.cali_f1_label,self.hbox_cali_f1)
         # self.fbox.addRow(self.cali_f2_label,self.hbox_cali_f2)
         # self.fbox.addRow(self.cali_f3_label,self.hbox_cali_f3)
         # self.fbox.addRow(self.cali_f4_label,self.hbox_cali_f4)
         self.fbox.addRow(self.listlabel,self.listWidget)
         self.fbox.addRow(self.list_control_label,self.list_control)
-        self.fbox.addRow(self.combo_label,self.combo)
-        self.fbox.addRow(self.glove_label,self.hbox_glove)
+        
 
         # Connect singal when slider change to function respectively to change value of label
         self.finger_slider_1.valueChanged.connect(self.valuechange1)
         self.finger_slider_2.valueChanged.connect(self.valuechange2)
         self.finger_slider_3.valueChanged.connect(self.valuechange3)
         self.finger_slider_4.valueChanged.connect(self.valuechange4)
-        self.finger_slider_5.valueChanged.connect(self.valuechange5)
+        
         # Add connect signal to Button Go, Cancel and Reset
         self.go_button.clicked.connect(self.handleButtonGo)
         self.home_button.clicked.connect(self.handleButtonHome)
@@ -376,42 +366,93 @@ class MyWidgetWC(QWidget):
 #             print "Service call failed: %s"%e
 #############################################################################################################
     def handle_list_control_save_button(self):
-        float_value_1 = float(self.value_slider_1.toPlainText())
-        float_value_2 = float(self.value_slider_2.toPlainText())
-        float_value_3 = float(self.value_slider_3.toPlainText())
-        float_value_4 = float(self.value_slider_4.toPlainText())
-        float_value_5 = float(self.value_slider_5.toPlainText())
-        pose0 = PoseCommand(f1=float_value_1,f2=float_value_2,f3=float_value_3,k1=float_value_4,k2=float_value_5)
-        self.listPose.append(pose0)
+        #currentGrasp = [[1.0,1.0,1.0],[2.0,2.0,2.0],[3.0,3.0,3.0]]
+        abspath = os.path.abspath(__file__)
+        
+        folderdatapath = abspath[:-len('/src/rqt_gui_control/glove_gui.py')] + '/data'
+        #print(folderdatapath)
+        name = 'grasp'+str(len(self.filename))+'.txt'
+        filename = folderdatapath + '/' + name
+        print(filename)
+        file = open(filename, "w")
+        data = "0.0;0.0;0.0" + "\n"
+        file.write(data)
+        file.close()
+        
+        for data in self.currentGrasp:
+            data = str(data[0]) + ";" +str(data[1]) + ";" + str(data[2]) + "\n"  
+            file = open(filename, "a")
+            file.write(data)
+            file.close()
 
-        item = QListWidgetItem("Pos(  '%2.2f'  ,  '%2.2f'  ,  '%2.2f'  ,  '%2.2f',  '%2.2f'  )" % (pose0.f1, pose0.f2, pose0.f3, pose0.k1, pose0.k2))
-        self.listWidget.addItem(item)
+        self.filename.append(name)
+        self.grasplist.append(filename)
+        item = QListWidgetItem(name)
+        self.listWidget.addItem(item)   
+            #print("Sucessfully written")
 
     def handle_list_control_delete_button(self):
-        print "remove button click"
+        print "Remove Grasp"
         #print self.listWidget.currentRow()
-        dummy = self.listPose.pop(self.listWidget.currentRow())
+        dummy = self.filename.pop(self.listWidget.currentRow())
+        dummy2 = self.grasplist.pop(self.listWidget.currentRow())
         #print dummy.f1
         dummyItem = self.listWidget.takeItem(self.listWidget.currentRow())
 
 
     def handle_list_control_go_button(self):
-        scaled_float_1 = 1.0
-        scaled_float_2 = 1.0
-        scaled_float_3 = 1.0
+        currentChoicepath = self.grasplist[self.listWidget.currentRow()]
+        currentChoicename = self.filename[self.listWidget.currentRow()]
+        print("Execute grapsh: " + currentChoicename)
+        file = open(currentChoicepath,'r').read()
         
+        #print(file)
+        lines = file.split('\n')
+        executionPose = []
+        for line in lines:
+            if len(line) > 1:
+                s1,s2,s3 = line.split(';')
+                executionPose.append([float(s1),float(s2),float(s3)])
+        #print(executionPose)
+        for pose in executionPose:
+            scaled_float_1 = pose[0]
+            scaled_float_2 = pose[1]
+            scaled_float_3 = pose[2]
+            
 
-        if (self.tick_glove_state == 1):
             # Scale raw value into readable value
             #print(scaled_float_1)
             self.value_glove_1.setText("%2.2f" % scaled_float_1)
             self.value_glove_2.setText("%2.2f" % scaled_float_2)
             self.value_glove_3.setText("%2.2f" % scaled_float_3)
-            data = str(scaled_float_1) + ";" +str(scaled_float_2) + ";" + str(scaled_float_3) + "\n"  
-            filename = "data/grasp1.txt"
-            file = open(filename, "a")
-            file.write(data)
-            file.close()
+            
+            # Based on the Combo box decided what to do with the value
+            if (self.combo.currentText() == "Rviz/Gazebo Simulation"):
+                #print(scaled_float_1)
+                tar_f1 = scaled_float_2
+                tar_f2 = scaled_float_3
+                tar_f3 = scaled_float_1
+                tar_f4 = float(self.value_slider_4.toPlainText())
+                #print "Go Button Click Simluation"
+                #print(tar_f1,tar_f2,tar_f3,tar_f4)
+                hand = Hand()
+                hand.motor[0].joint_angle = tar_f1
+                hand.motor[1].joint_angle = tar_f2
+                hand.motor[2].joint_angle = tar_f3
+                hand.motor[3].joint_angle = tar_f4
+                self.command_pub_sim.publish(hand)
+            else: 
+                tar_f1 = scaled_float_2
+                tar_f2 = scaled_float_3
+                tar_f3 = scaled_float_1
+                tar_f4 = float(self.value_slider_4.toPlainText())
+                #print "Go Button Click with target"
+                #print(tar_f1,tar_f2,tar_f3,tar_f4)
+                poseTarget = PoseCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,preshape=tar_f4)
+                self.command_pub.publish(poseTarget)
+
+            rospy.sleep(0.2)
+        print "Finish Grasp"
             #rospy.sleep(2.)
 ######### tickchange for updating tick ###############################################################
 
@@ -444,10 +485,6 @@ class MyWidgetWC(QWidget):
     def valuechange4(self):
         float_value = float(self.finger_slider_4.value())/100.0
         self.value_slider_4.setText("%2.2f" % float_value)
-
-    def valuechange5(self):
-        float_value = float(self.finger_slider_5.value())/100.0 - 2.0
-        self.value_slider_5.setText("%2.2f" % float_value)
 
 #############################################################################################################
     def tickchange(self,b):
@@ -495,7 +532,6 @@ class MyWidgetWC(QWidget):
             tar_f2 = float(self.value_slider_2.toPlainText())
             tar_f3 = float(self.value_slider_3.toPlainText())
             tar_f4 = float(self.value_slider_4.toPlainText())
-             
             print "Go Button Click Simluation"
             print(tar_f1,tar_f2,tar_f3,tar_f4)
             hand = Hand()
@@ -504,16 +540,6 @@ class MyWidgetWC(QWidget):
             hand.motor[2].joint_angle = tar_f3
             hand.motor[3].joint_angle = tar_f4
             self.command_pub_sim.publish(hand)
-        elif (self.combo.currentText() == "MQP Hand"):
-                tar_f1 = float(self.value_slider_1.toPlainText())
-                tar_f2 = float(self.value_slider_2.toPlainText())
-                tar_f3 = float(self.value_slider_3.toPlainText())
-                tar_f4 = float(self.value_slider_4.toPlainText())
-                tar_f5 = float(self.value_slider_5.toPlainText())
-                #print "Go Button Click with target"
-                #print(tar_f1,tar_f2,tar_f3,tar_f4)
-                poseTarget = PoseCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,k1=tar_f4,k2=tar_f5)
-                self.command_pub.publish(poseTarget)
 
 
         else:
@@ -528,7 +554,7 @@ class MyWidgetWC(QWidget):
             #print "Go Button Click"
 
     def handleButtonHome(self):
-        poseTarget = PoseCommand(f1=0.0,f2=0.0,f3=0.0,k1=0.0,k2=0.0)
+        poseTarget = PoseCommand(f1=0.0,f2=0.0,f3=0.0,preshape=0.0)
         self.command_pub.publish(poseTarget)
         print "Home Button Click"
 
@@ -544,17 +570,23 @@ class MyWidgetWC(QWidget):
         print "Reset Button Click"
     ## Update Value of the hand for checking for waypoint
     def hand_state_cb(self, hand):
-        self.current_angle[0] = hand.motor[0].joint_angle
-        self.current_angle[1] = hand.motor[1].joint_angle
-        self.current_angle[2] = hand.motor[2].joint_angle
-        self.current_angle[3] = hand.motor[3].joint_angle
+        #self.current_angle[0] = hand.motor[0].joint_angle
+        #self.current_angle[1] = hand.motor[1].joint_angle
+        #self.current_angle[2] = hand.motor[2].joint_angle
+        #self.current_angle[3] = hand.motor[3].joint_angle
+        pass
 
     # Receive messages from 
     def received_int(self, value_received):
-        scaled_float_1 = 2.0-(float(value_received.data[0])-450.0)/100.0
-        scaled_float_2 = 2.0-(float(value_received.data[1])-500.0)/80.0  
-        scaled_float_3 = 2.0 - (float(value_received.data[2])-440)/80.0  
-        
+        # Reflex SF hand
+        # scaled_float_1 = 3.0-(float(value_received.data[0])-450.0)/100.0
+        # scaled_float_2 = 3.0-(float(value_received.data[1])-500.0)/80.0  + 0.5
+        # scaled_float_3 = 3.0 - (float(value_received.data[2])-440)/80.0  + 0.5
+
+        # Simulation
+        scaled_float_1 = 3.0-((float(value_received.data[0])-450.0)/100.0+2.0)
+        scaled_float_2 = 3.0-((float(value_received.data[1])-500.0)/80.0  + 0.5)
+        scaled_float_3 = 3.0 - ((float(value_received.data[2])-440)/80.0  + 0.5)
 
         if (self.tick_glove_state == 1):
             # Scale raw value into readable value
@@ -562,18 +594,21 @@ class MyWidgetWC(QWidget):
             self.value_glove_1.setText("%2.2f" % scaled_float_1)
             self.value_glove_2.setText("%2.2f" % scaled_float_2)
             self.value_glove_3.setText("%2.2f" % scaled_float_3)
-            data = str(scaled_float_1) + ";" +str(scaled_float_2) + ";" + str(scaled_float_3) + "\n"  
-            filename = "data/grasp1.txt"
-            file = open(filename, "a")
-            file.write(data)
-            file.close()
-            # Based on the Combo box decided what to do with the value
+            self.currentGrasp.append([scaled_float_1,scaled_float_2,scaled_float_3])
+            # data = str(scaled_float_1) + ";" +str(scaled_float_2) + ";" + str(scaled_float_3) + "\n"  
+            # filename = "dataplot.txt"
+            # file = open(filename, "a")
+            # file.write(data)
+            # file.close()
+
+            # # Based on the Combo box decided what to do with the value
             if (self.combo.currentText() == "Rviz/Gazebo Simulation"):
                 #print(scaled_float_1)
                 tar_f1 = scaled_float_2
-                tar_f2 = scaled_float_2
+                tar_f2 = scaled_float_3
                 tar_f3 = scaled_float_1
-                tar_f4 = scaled_float_3
+                tar_f4 = float(self.value_slider_4.toPlainText())
+                
                 #print "Go Button Click Simluation"
                 #print(tar_f1,tar_f2,tar_f3,tar_f4)
                 hand = Hand()
@@ -582,16 +617,6 @@ class MyWidgetWC(QWidget):
                 hand.motor[2].joint_angle = tar_f3
                 hand.motor[3].joint_angle = tar_f4
                 self.command_pub_sim.publish(hand)
-            elif (self.combo.currentText() == "MQP Hand"):
-                tar_f1 = scaled_float_3
-                tar_f2 = scaled_float_2
-                tar_f3 = scaled_float_1
-                tar_f4 = float(self.value_slider_4.toPlainText())
-                tar_f5 = float(self.value_slider_5.toPlainText())
-                #print "Go Button Click with target"
-                #print(tar_f1,tar_f2,tar_f3,tar_f4)
-                poseTarget = PoseCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,k1=tar_f4,k2=tar_f5)
-                self.command_pub.publish(poseTarget)
             else: 
                 tar_f1 = scaled_float_2
                 tar_f2 = scaled_float_3
@@ -601,7 +626,23 @@ class MyWidgetWC(QWidget):
                 #print(tar_f1,tar_f2,tar_f3,tar_f4)
                 poseTarget = PoseCommand(f1=tar_f1,f2=tar_f2,f3=tar_f3,preshape=tar_f4)
                 self.command_pub.publish(poseTarget)
-                
+        else:
+            self.currentGrasp = []
 
+    def readGrasp(self):
 
+        abspath = os.path.abspath(__file__)
+            
+        folderdatapath = abspath[:-len('/src/rqt_gui_control/glove_gui.py')] + '/data'
+        
+        for file in os.listdir(folderdatapath):
+            if file.endswith(".txt"):
+                self.grasplist.append(os.path.join(folderdatapath, file))
+                self.filename.append(file)
+        #print(self.grasplist)
+
+        self.listWidget = QListWidget()
+        for name in self.filename:
+            item = QListWidgetItem(name)
+            self.listWidget.addItem(item)
 

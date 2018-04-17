@@ -10,6 +10,7 @@ from my_widget_vel_pos import MyWidgetVelPos
 from my_widget_vel import MyWidgetVel
 from my_cali_widget import MyWidgetCali
 from server_gui import ServerGui
+from glove_gui import GloveWidget
 
 import socket               # Import socket module
 
@@ -41,8 +42,8 @@ class MyPlugin(Plugin):
         # self._widget3.setObjectName('MyPosVelUI')
         self._widget4 = MyWidgetCali()
         self._widget4.setObjectName('MyCali')
-        self._widget5 = ServerGui()
-        self._widget5.setObjectName('MyServer')
+        self._widget5 = GloveWidget()
+        self._widget5.setObjectName('Glove Interface')
 
         # self._widget.setWindowTitle("Position Control")
         # self._widget2.setWindowTitle("Velocity Control")
