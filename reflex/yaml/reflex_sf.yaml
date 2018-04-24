@@ -4,12 +4,13 @@ reflex_sf_f1:
         module: joint_position_controller
         type: JointPositionController
     joint_name: reflex_sf_f1
-    motor_to_joint_inverted: False
+    manual_calibrate: False
+    motor_to_joint_inverted: True
     motor_to_joint_gear_ratio: 1.42
     default_motor_speed: 4.5
     max_motor_speed: 6.0
     max_motor_travel: 3.75
-    overload_threshold: 0.25
+    overload_threshold: 0.5
     motor:
         id: 1
         init: 0
@@ -22,12 +23,13 @@ reflex_sf_f2:
         module: joint_position_controller
         type: JointPositionController
     joint_name: reflex_sf_f2
-    motor_to_joint_inverted: True
+    manual_calibrate: False
+    motor_to_joint_inverted: False
     motor_to_joint_gear_ratio: 1.42
     default_motor_speed: 4.5
     max_motor_speed: 6.0
     max_motor_travel: 3.75
-    overload_threshold: 0.25
+    overload_threshold: 0.5
     motor:
         id: 2
         init: 0
@@ -40,32 +42,53 @@ reflex_sf_f3:
         module: joint_position_controller
         type: JointPositionController
     joint_name: reflex_sf_f3
-    motor_to_joint_inverted: True
+    manual_calibrate: False
+    motor_to_joint_inverted: False
     motor_to_joint_gear_ratio: 1.42
     default_motor_speed: 4.5
     max_motor_speed: 6.0
     max_motor_travel: 3.75
-    overload_threshold: 0.25
+    overload_threshold: 0.5
     motor:
         id: 3
         init: 0
         min: 0
         max: 28672
 
-reflex_sf_preshape:
+reflex_sf_k1:
     controller:
         package: dynamixel_controllers
         module: joint_position_controller
         type: JointPositionController
     joint_name: reflex_sf_preshape
+    manual_calibrate: True
     motor_to_joint_inverted: True
-    motor_to_joint_gear_ratio: 1.5
+    motor_to_joint_gear_ratio: 3.23
     default_motor_speed: 4.5
     max_motor_speed: 6.0
     max_motor_travel: 1.75
-    overload_threshold: 0.55  # preshape threshold is higher due to different gearing
+    overload_threshold: 0.8  # preshape threshold is higher due to different gearing
     motor:
         id: 4
+        init: 0
+        min: 0
+        max: 28672
+
+reflex_sf_k2:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: reflex_sf_preshape
+    manual_calibrate: True
+    motor_to_joint_inverted: True
+    motor_to_joint_gear_ratio: 1
+    default_motor_speed: 4.5
+    max_motor_speed: 6.0
+    max_motor_travel: 1.75
+    overload_threshold: 0.5  # direct drive finger
+    motor:
+        id: 5
         init: 0
         min: 0
         max: 28672

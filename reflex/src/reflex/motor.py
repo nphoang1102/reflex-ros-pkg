@@ -41,11 +41,17 @@ class Motor(object):
         self._motor_msg = reflex_msgs.msg.Motor()
         self._in_control_force_mode = False
 
+    def get_name(self):
+        return self.name
+
     def get_current_joint_angle(self):
         return self._motor_msg.joint_angle
 
     def get_load(self):
         return self._motor_msg.load
+
+    def get_load_threshold(self):
+        return self._OVERLOAD_THRESHOLD
 
     def get_motor_msg(self):
         return self._motor_msg

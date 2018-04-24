@@ -1,23 +1,10 @@
 #############################################################################
-# Copyright 2015 Right Hand Robotics
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Modified reflex_sf_hand.py from Right Hand Robotics to be run with the 
+# reflex_one_hand.py
 #############################################################################
 
-__author__ = 'Eric Schneider'
-__copyright__ = 'Copyright (c) 2015 RightHand Robotics'
-__license__ = 'Apache License 2.0'
-__maintainer__ = 'RightHand Robotics'
+__author__ = 'Hoang Nguyen'
+__maintainer__ = 'Hoang Nguyen'
 __email__ = 'reflex-support@righthandrobotics.com'
 
 
@@ -30,13 +17,12 @@ from std_msgs.msg import Float64
 from motor import Motor
 
 
-class ReflexSFMotor(Motor):
+class ReflexOneMotor(Motor):
     def __init__(self, name):
-        super(ReflexSFMotor, self).__init__(name)
+        super(ReflexOneMotor, self).__init__(name)
         self.zero_point = rospy.get_param(self.name + '/zero_point')
         self.MOTOR_TO_JOINT_GEAR_RATIO = rospy.get_param(self.name + '/motor_to_joint_gear_ratio')
         self.MOTOR_TO_JOINT_INVERTED = rospy.get_param(self.name + '/motor_to_joint_inverted')
-        self.MANUAL_CALIBRATE = rospy.get_param(self.name + '/manual_calibrate')
         self.motor_cmd_pub = rospy.Publisher(name + '/command', Float64, queue_size=10)
         self.set_speed_service = rospy.ServiceProxy(name + '/set_speed', SetSpeed)
         self.torque_enable_service = rospy.ServiceProxy(name + '/torque_enable', TorqueEnable)
@@ -52,9 +38,6 @@ class ReflexSFMotor(Motor):
 
     def get_gear_ratio(self):
         return self.MOTOR_TO_JOINT_GEAR_RATIO
-
-    def get_manual_calibrate(self):
-        return self.MANUAL_CALIBRATE
 
     def set_motor_angle(self, goal_pos):
         '''

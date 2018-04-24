@@ -23,7 +23,6 @@ __maintainer__ = 'RightHand Robotics'
 __email__ = 'reflex-support@righthandrobotics.com'
 
 from string import lstrip
-from math import pi as PI
 
 from os.path import join
 import yaml
@@ -34,19 +33,20 @@ import rospy
 from std_srvs.srv import Empty
 from rqt_service.srv import SendTwoInt
 
-from reflex_hand import ReflexHand
+from reflex_hand_v2 import ReflexHandV2
 from reflex_sf_motor import ReflexSFMotor
 import reflex_msgs.msg
 
 
-class ReflexSFHand(ReflexHand):
+class ReflexSFHandV2(ReflexHandV2):
     def __init__(self):
-        super(ReflexSFHand, self).__init__('/reflex_sf', ReflexSFMotor)
+        super(ReflexSFHandV2, self).__init__('/reflex_sf', ReflexSFMotor)
         self.hand_state_pub = rospy.Publisher(self.namespace + '/hand_state',
                                               reflex_msgs.msg.Hand, queue_size=10)
         rospy.Service(self.namespace + '/calibrate_fingers', Empty, self.calibrate)
         rospy.Service('/send_two_int', SendTwoInt, self.gui_calibrate)
         rospy.Service(self.namespace + '/auto_calibrate', Empty, self.auto_calibrate)
+        self.motornames = rospy.get_param('motor_name')
 
     def _receive_cmd_cb(self, data):
         self.disable_force_control()
@@ -77,9 +77,15 @@ class ReflexSFHand(ReflexHand):
             motor.enable_torque()
 
     def _publish_hand_state(self):
+        # state = reflex_msgs.msg.Hand()
+        # motor_names = ('_f1', '_f2', '_f3', '_preshape1', '_preshape2')
+        # for i in range(5):
+        #     state.motor[i] = self.motors[self.namespace + motor_names[i]].get_motor_msg()
+        # self.hand_state_pub.publish(state)
+        
         state = reflex_msgs.msg.Hand()
-        for i in range(len(self.motor_names)):
-            state.motor[i] = self.motors[self.motor_names[i]].get_motor_msg()
+        for i in range(len(self.motornames)):
+            state.motor[i] = self.motors[self.namespace + self.motornames[i]].get_motor_msg()
         self.hand_state_pub.publish(state)
 
     def calibrate(self, data=None):
@@ -152,71 +158,60 @@ motor, or 'q' to indicate that the zero point has been reached\n")
         return 1
 
     # Motor autocalibration process
-    def auto_calibrate(self, data=None, speed=1.00, manual_start=True):
+    def auto_calibrate(self, data=None):
+        # Zeroed the current position first
+        # self._zero_current_pose()
 
         # Variable to store zero pos
         preshape = "/reflex_sf_preshape"
         zero_pos = dict()
 
-        # First thing, manually calibrate the preshape joint, only when needed
-        if (manual_start):
-            for motor in sorted(self.motors):
-                if (not motor.get_manual_calibrate()):
-                    break
-                rospy.loginfo("Start manual calibrating %s.", motor.get_name())
-                command = raw_input("Type 't' to tighten motor, 'l' to loosen \
-                motor, or 'q' to indicate that the zero point has been reached\n")
-                while not command.lower() == 'q':
-                    if command.lower() == 't' or command.lower() == 'tt':
-                        print "Tightening motor " + preshape
-                        self.motors[preshape].tighten(0.35 * len(command) - 0.3)
-                    elif command.lower() == 'l' or command.lower() == 'll':
-                        print "Loosening motor " + preshape
-                        self.motors[preshape].loosen(0.35 * len(command) - 0.3)
-                    else:
-                        print "Didn't recognize that command, use 't', 'l', or 'q'"
-                    command = raw_input("Tighten: 't'\tLoosen: 'l'\tDone: 'q'\n")
-                rospy.loginfo("Manual calibration done, start auto calibrate the rest of the fingers.")
+        # First thing, manually calibrate the preshape joint
+#         rospy.loginfo("Start manual calibrating %s.", preshape.lstrip("/"))
+#         command = raw_input("Type 't' to tighten motor, 'l' to loosen \
+# motor, or 'q' to indicate that the zero point has been reached\n")
+        while not command.lower() == 'q':
+            if command.lower() == 't' or command.lower() == 'tt':
+                print "Tightening motor " + preshape
+                self.motors[preshape].tighten(0.35 * len(command) - 0.3)
+            elif command.lower() == 'l' or command.lower() == 'll':
+                print "Loosening motor " + preshape
+                self.motors[preshape].loosen(0.35 * len(command) - 0.3)
+            else:
+                print "Didn't recognize that command, use 't', 'l', or 'q'"
+            command = raw_input("Tighten: 't'\tLoosen: 'l'\tDone: 'q'\n")
+        rospy.loginfo("Manual calibration done, start auto calibrate the rest of the fingers.")
 
         # Goes through the fingers first, the preshape is still tricky
         for motor in sorted(self.motors):
-            if (motor.get_manual_calibrate()):
+            if (motor == preshape):
                 zero_pos[preshape.lstrip("/")] = dict(zero_point=self.motors[self.namespace + '_preshape'].get_current_raw_motor_angle())
                 break
 
-            # Zeroed the current position first
-            self.motors[motor]._set_local_motor_zero_point()
-            
-            # Prompt user that we are currently auto calibrating motor
+            # State we are currently auto calibrating motor
             rospy.loginfo("Start auto calibrating motor " + motor)
 
             # Slowly increment the joint position until overload reached
             while (self.motors[motor].get_load() < (self.motors[motor].get_load_threshold() * 0.5)):
-                self.motors[motor].set_motor_velocity(speed)
+                self.motors[motor].set_motor_velocity(1.25)
 
-            # Overload position reached, start computation
+            # Open up again ?!
+            # TODO: Actually do something meaningful here...
+            self.motors[motor].set_motor_velocity(-1.25)
             if (self.motors[motor].get_flip()):
-                offset = -PI * self.motors[motor].get_gear_ratio()
+                offset = -4.7
             else:
-                offset = PI * self.motors[motor].get_gear_ratio()
-            # Explanation on the math here: according to the documentation under reflex_msgs/Finger.msg, the
-            # moving space of the finger is from 0 to pi, thus explained the mathametical model here
-
-            # Computating the zeroed angle to send out
-            zeroed_angle = self.motors[motor].get_current_raw_motor_angle() - offset
-            zero_pos[motor.lstrip("/")] = dict(zero_point=zeroed_angle)
-
-            # Bug fix: Write the zero position to the ros param, or else it would not take effect
-            self.motors[motor]._set_local_motor_zero_point(zeroed_angle)
-
-            # Got zero position, open up the hand to desired position and print out
-            # cannot send negative speed as the zeroed angle will not be updated till then
-            self.motors[motor].set_motor_angle(0.0)
+                offset = 4.7
+            zero_pos[motor.lstrip("/")] = dict(zero_point=self.motors[motor].get_current_raw_motor_angle() - offset)
+            # print("Overload angle:", self.motors[motor].get_current_raw_motor_angle())
             rospy.loginfo("%s done.", motor)
 
-        # Write to .yaml file and prompt user
-        self._write_zero_point_data_to_file('reflex_sf_zero_points.yaml', zero_pos)
+        # End here, write calibration data to .yaml file and prompt user
         print "Auto-calibration complete, writing data to file"
+        # print(zero_pos)
+        yaml_path = rospy.get_param('yaml_zero_path')
+        self._write_zero_point_data_to_file(yaml_path, data)
+        # self._write_zero_point_data_to_file('reflex_sf_zero_points.yaml', zero_pos)
         return [] # rospy will raise an error if I return None here, interesting
 
 
@@ -230,21 +225,39 @@ motor, or 'q' to indicate that the zero point has been reached\n")
             outfile.write(yaml.dump(data))
 
     def _zero_current_pose(self):
+        # data = dict(
+        #     reflex_sf_f1=dict(zero_point=self.motors[self.namespace + '_f1'].get_current_raw_motor_angle()),
+        #     reflex_sf_f2=dict(zero_poxint=self.motors[self.namespace + '_f2'].get_current_raw_motor_angle()),
+        #     reflex_sf_f3=dict(zero_point=self.motors[self.namespace + '_f3'].get_current_raw_motor_angle()),
+        #     reflex_sf_preshape=dict(zero_point=self.motors[self.namespace + '_preshape'].get_current_raw_motor_angle())
+        # )
         data = dict()
-        for motor in self.motor_names:
-            data[motor[1:]] = dict(zero_point=self.motors[motor].get_current_raw_motor_angle())
-        self._write_zero_point_data_to_file('reflex_sf_zero_points.yaml', data)
+        for motorname in self.motornames:
+            name = self.namespace + motorname
+            data.update({name:dict(zero_point=self.motors[name].get_current_raw_motor_angle())})
+        yaml_path = rospy.get_param('yaml_zero_path')
+        self._write_zero_point_data_to_file(yaml_path, data)
 
 
 def main():
-    # rospy.sleep(4.0)  # To allow services and parameters to load
-    hand = ReflexSFHand()
-    rospy.on_shutdown(hand.disable_torque)
-    r = rospy.Rate(20)
+    rospy.sleep(4.0)  # To allow services and parameters to load
+    # hand = ReflexSFHandV2()
+    # rospy.on_shutdown(hand.disable_torque)
+    test()
+    # r = rospy.Rate(20)
     while not rospy.is_shutdown():
-        hand._publish_hand_state()
-        r.sleep()
+        # hand._publish_hand_state()
+        # r.sleep()
+        pass
 
+def test():
+    #hand = ReflexSFHandV2()
+    testmsg = reflex_msgs.msg.PoseCommand(4.0,3.0,2.0,1.0)
+    print(testmsg)
+    x = getattr(testmsg,"f1")
+    print(x)
+    yaml_path = rospy.get_param('yaml_zero_path')
+    print(yaml_path)
 
 if __name__ == '__main__':
     main()

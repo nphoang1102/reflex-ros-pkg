@@ -23,42 +23,29 @@ __email__ = 'reflex-support@righthandrobotics.com'
 
 import rospy
 from std_msgs.msg import Float64
-from std_msgs.msg import Bool
 from std_srvs.srv import Empty
 
 import reflex_msgs.msg
 
 
-class ReflexHand(object):
+class ReflexHandV2(object):
     def __init__(self, name, MotorClass):
         '''
         Assumes that "name" is the name of the hand with a preceding
         slash, e.g. /reflex_takktile or /reflex_sf
         '''
         self.namespace = name
+        self.motornames = rospy.get_param('motor_name')
+        print(self.motornames)
         rospy.init_node('reflex_hand')
-
-        # Identifier to check whether the controllers are spawned successfully or not
-        self.controller_startup = False
-
-        # Wait for the controller process to done completely
-        rospy.Subscriber('controller_spawner_done_init', Bool, self.controller_status_cb)
-        while not self.get_controller_startup_status():
-            pass
-        rospy.sleep(0.4) # brief delay just so all of the additional informations from the 
-        # dxl packages get printed out
-
-        # Start initiating motor controllers based on the input list from the launch file
         rospy.loginfo('Starting up the hand')
-        self.input_motors = rospy.get_param('motors_list')
-        self.motors = dict()
-        self.motor_names = []
-        for motor in self.input_motors:
-            name = self.namespace + "_" + motor
-            self.motors[name] = MotorClass(name)
-            self.motor_names.append(name)
-
-        # Setup subscriber for sending out messages to motors
+        self.motors = {}
+        for motorname in self.motornames:
+            self.motors.update({self.namespace + motorname: MotorClass(self.namespace + motorname)})
+        # self.motors = {self.namespace + '_f1': MotorClass(self.namespace + '_f1'),
+        #                self.namespace + '_f2': MotorClass(self.namespace + '_f2'),
+        #                self.namespace + '_f3': MotorClass(self.namespace + '_f3'),
+        #                self.namespace + '_preshape': MotorClass(self.namespace + '_preshape')}
         rospy.Subscriber(self.namespace + '/command',
                          reflex_msgs.msg.Command, self._receive_cmd_cb)
         rospy.Subscriber(self.namespace + '/command_position',
@@ -68,7 +55,6 @@ class ReflexHand(object):
         rospy.Subscriber(self.namespace + '/command_motor_force',
                          reflex_msgs.msg.ForceCommand, self._receive_force_cmd_cb)
         rospy.loginfo('ReFlex hand has started, waiting for commands...')
-
 
     def _receive_cmd_cb(self, data):
         raise NotImplementedError
@@ -83,20 +69,44 @@ class ReflexHand(object):
         raise NotImplementedError
 
     def set_angles(self, pose):
-        for motor_name in self.input_motors:
-            self.motors[self.namespace+"_"+motor_name].set_motor_angle(getattr(pose, motor_name))
+        for motorname in self.motornames:
+            stripname = motorname.lstrip("_")
+            self.motors[self.namespace + motorname].set_motor_angle(getattr(pose,stripname))
+
+        # self.motors[self.namespace + '_f1'].set_motor_angle(pose.f1)
+        # self.motors[self.namespace + '_f2'].set_motor_angle(pose.f2)
+        # self.motors[self.namespace + '_f3'].set_motor_angle(pose.f3)
+        # self.motors[self.namespace + '_preshape'].set_motor_angle(pose.preshape)
 
     def set_velocities(self, velocity):
-        for motor_name in self.input_motors:
-            self.motors[self.namespace+"_"+motor_name].set_motor_angle(getattr(velocity, motor_name))
+        for motorname in self.motornames:
+            stripname = motorname.lstrip("_")
+            self.motors[self.namespace + motorname].set_motor_velocity(getattr(velocity,stripname))
+
+        # self.motors[self.namespace + '_f1'].set_motor_velocity(velocity.f1)
+        # self.motors[self.namespace + '_f2'].set_motor_velocity(velocity.f2)
+        # self.motors[self.namespace + '_f3'].set_motor_velocity(velocity.f3)
+        # self.motors[self.namespace + '_preshape'].set_motor_velocity(velocity.preshape)
 
     def set_speeds(self, speed):
-        for motor_name in self.input_motors:
-            self.motors[self.namespace+"_"+motor_name].set_motor_angle(getattr(speed, motor_name))
+        for motorname in self.motornames:
+            stripname = motorname.lstrip("_")
+            self.motors[self.namespace + motorname].set_motor_speed(getattr(speed,stripname))
+
+        # self.motors[self.namespace + '_f1'].set_motor_speed(speed.f1)
+        # self.motors[self.namespace + '_f2'].set_motor_speed(speed.f2)
+        # self.motors[self.namespace + '_f3'].set_motor_speed(speed.f3)
+        # self.motors[self.namespace + '_preshape'].set_motor_speed(speed.preshape)
 
     def set_force_cmds(self, torque):
-        for motor_name in self.input_motors:
-            self.motors[self.namespace+"_"+motor_name].set_motor_angle(getattr(torque, motor_name))
+        for motorname in self.motornames:
+            stripname = motorname.lstrip("_")
+            self.motors[self.namespace + motorname].set_force_cmd(getattr(torque,stripname))
+            
+        # self.motors[self.namespace + '_f1'].set_force_cmd(torque.f1)
+        # self.motors[self.namespace + '_f2'].set_force_cmd(torque.f2)
+        # self.motors[self.namespace + '_f3'].set_force_cmd(torque.f3)
+        # self.motors[self.namespace + '_preshape'].set_force_cmd(torque.preshape)
 
     def reset_speeds(self):
         for ID, motor in self.motors.items():
@@ -111,11 +121,3 @@ class ReflexHand(object):
         rospy.sleep(0.05)  # Lets other actions happen before beginning constant torque commands
         for ID, motor in self.motors.items():
             motor.enable_force_control()
-
-    # Callback to update the status of the controller status
-    def controller_status_cb(self, data):
-        self.controller_startup = data.data
-
-    # Helper function to check if the controller spawners has finished initiating
-    def get_controller_startup_status(self):
-        return self.controller_startup
